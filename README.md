@@ -2,7 +2,7 @@
 
 ## AI-Based Disease Prediction and Healthcare Assistance System
 
-**Project By:** Suhani Srivastava  & krishna Gupta
+**Project By:** Suhani Srivastava  & Krishna Gupta
 **Program:** Master of Computer Applications (MCA)  
 **Year:** 2024-2026
 
@@ -138,4 +138,4 @@ For **Common Cold**:
 
 ---
 
-**Built with ❤️ for MCA College Submission**
+**Built with ❤️**
