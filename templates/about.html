@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}About - AI MediDetect{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-4">
+                <h1 class="display-5 fw-bold text-primary"><i class="bi bi-info-circle"></i> About AI MediDetect</h1>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 p-md-5">
+                    <h3 class="fw-bold mb-3">What is AI MediDetect?</h3>
+                    <p class="text-muted lead">AI MediDetect is an <strong>AI-Based Disease Prediction and Healthcare Assistance System</strong> developed as an educational project for MCA college submission.</p>
+                    <p class="text-muted">This web application demonstrates the practical application of machine learning in healthcare by analyzing user-reported symptoms and predicting possible medical conditions using a trained Random Forest classifier.</p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0 h5"><i class="bi bi-target"></i> Project Objectives</h4>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> <strong>Demonstrate ML in Healthcare:</strong> Show how machine learning can be applied to medical symptom analysis</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> <strong>Provide Healthcare Information:</strong> Offer general information about common diseases and precautions</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> <strong>Hospital Locator:</strong> Help users find nearby healthcare facilities using OpenStreetMap</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> <strong>Educational Purpose:</strong> Serve as a learning project for AI/ML applications</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-info text-white py-3">
+                    <h4 class="mb-0 h5"><i class="bi bi-layers"></i> Technology Stack</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Frontend</h6>
+                            <ul class="list-unstyled mb-0 text-muted">
+                                <li><i class="bi bi-dot"></i> HTML5 & CSS3</li>
+                                <li><i class="bi bi-dot"></i> Bootstrap 5</li>
+                                <li><i class="bi bi-dot"></i> JavaScript</li>
+                                <li><i class="bi bi-dot"></i> Leaflet.js (Maps)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Backend</h6>
+                            <ul class="list-unstyled mb-0 text-muted">
+                                <li><i class="bi bi-dot"></i> Python 3.12</li>
+                                <li><i class="bi bi-dot"></i> Flask</li>
+                                <li><i class="bi bi-dot"></i> scikit-learn</li>
+                                <li><i class="bi bi-dot"></i> Pandas & NumPy</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Data & APIs</h6>
+                            <ul class="list-unstyled mb-0 text-muted">
+                                <li><i class="bi bi-dot"></i> CSV Datasets</li>
+                                <li><i class="bi bi-dot"></i> Pickle (Model Storage)</li>
+                                <li><i class="bi bi-dot"></i> OpenStreetMap API</li>
+                                <li><i class="bi bi-dot"></i> Overpass API</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Deployment</h6>
+                            <ul class="list-unstyled mb-0 text-muted">
+                                <li><i class="bi bi-dot"></i> Gunicorn</li>
+                                <li><i class="bi bi-dot"></i> Render/Railway</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-warning border-0 shadow-sm mb-4">
+                <div class="d-flex gap-3">
+                    <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+                    <div>
+                        <h5 class="fw-bold mb-2">Medical Disclaimer</h5>
+                        <p class="mb-2"><strong>AI MediDetect is an educational project only.</strong> It is designed to demonstrate machine learning applications in healthcare and is <strong>NOT intended for actual medical diagnosis</strong>.</p>
+                        <p class="mb-0"><strong>Always consult qualified healthcare professionals</strong> for proper medical diagnosis, advice, and treatment. In case of medical emergencies, contact emergency services immediately.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body p-4 text-center">
+                    <p class="mb-2"><strong>Project Type:</strong> MCA College Mini-Project</p>
+                    <p class="mb-2"><strong>Developed By:</strong> Suhani Srivastava & Krishna Gupta</p>
+                    <p class="mb-0"><strong>Year:</strong> 2024-2026</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

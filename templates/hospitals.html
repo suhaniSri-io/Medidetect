@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% block title %}Find Hospitals - AI MediDetect{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="text-center mb-4">
+                <h1 class="display-5 fw-bold text-primary"><i class="bi bi-hospital"></i> Find Nearby Hospitals</h1>
+                <p class="lead text-muted">Locate healthcare facilities near your city using OpenStreetMap</p>
+            </div>
+
+            <!-- Search Form -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" action="{{ url_for('hospitals') }}">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="bi bi-geo-alt"></i> City/Location Name</label>
+                            <input type="text" class="form-control form-control-lg" name="location" 
+                                   placeholder="Enter city name (e.g., Lucknow, Delhi, Mumbai, Bangalore)" 
+                                   value="{{ request.form.get('location', '') }}" required>
+                            <small class="text-muted">💡 Tip: Enter a major city name for best results</small>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-pin-map"></i> Latitude (Optional)
+                                </label>
+                                <input type="number" step="0.0001" class="form-control" name="lat" 
+                                       placeholder="26.8467" value="{{ request.form.get('lat', '') }}">
+                                <small class="text-muted">Leave blank if using city name</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-pin-map"></i> Longitude (Optional)
+                                </label>
+                                <input type="number" step="0.0001" class="form-control" name="lon" 
+                                       placeholder="80.9462" value="{{ request.form.get('lon', '') }}">
+                                <small class="text-muted">Leave blank if using city name</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="bi bi-arrows-fullscreen"></i> Search Radius
+                            </label>
+                            <select class="form-select form-select-lg" name="radius">
+                                <option value="3000">3 km (Small Area)</option>
+                                <option value="5000" selected>5 km (Recommended)</option>
+                                <option value="10000">10 km (Large Area)</option>
+                                <option value="20000">20 km (Very Large Area)</option>
+                                <option value="50000">50 km (Maximum)</option>
+                            </select>
+                            <small class="text-muted">💡 If no hospitals found, try increasing the radius</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-search"></i> Search Hospitals
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            {% if error %}
+            <div class="alert alert-danger border-0 shadow-sm" role="alert">
+                <div class="d-flex gap-3">
+                    <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                    <div>
+                        <h5 class="fw-bold mb-2">Search Error</h5>
+                        <p class="mb-2">{{ error }}</p>
+                        {% if 'suggestion' in request.form %}
+                        <p class="mb-0"><strong>💡 Suggestion:</strong> {{ request.form.get('suggestion') }}</p>
+                        {% endif %}
+                        <hr class="my-2">
+                        <p class="mb-0 small">
+                            <strong>Tips:</strong><br>
+                            • Try a major city name (e.g., "Lucknow", "Delhi", "Mumbai")<br>
+                            • Check your internet connection<br>
+                            • Try increasing the search radius<br>
+                            • Some rural areas may have limited hospital data
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Results -->
+            {% if results %}
+            <div class="alert alert-success border-0 shadow-sm mb-4">
+                <i class="bi bi-check-circle-fill"></i>
+                <strong>Success!</strong> Found {{ results.count }} hospitals/clinics within {{ results.radius_km }} km of {{ results.search_location }}
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0 h5">
+                        <i class="bi bi-list-check"></i> Hospitals Found ({{ results.count }})
+                    </h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th style="width: 35%;">Hospital Name</th>
+                                    <th style="width: 40%;">Address</th>
+                                    <th style="width: 15%;">Distance</th>
+                                    <th style="width: 10%;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hospital in results.hospitals %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ hospital.name }}</strong>
+                                        {% if hospital.emergency %}
+                                        <span class="badge bg-danger ms-2"><i class="bi bi-lightning-fill"></i> Emergency</span>
+                                        {% endif %}
+                                        {% if hospital.phone %}
+                                        <br><small class="text-muted"><i class="bi bi-telephone"></i> {{ hospital.phone }}</small>
+                                        {% endif %}
+                                        {% if hospital.website %}
+                                        <br><small class="text-muted"><i class="bi bi-globe"></i> <a href="{{ hospital.website }}" target="_blank">Website</a></small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ hospital.address }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ hospital.distance }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="https://www.openstreetmap.org/?mlat={{ hospital.lat }}&mlon={{ hospital.lon }}#map=16/{{ hospital.lat }}/{{ hospital.lon }}" 
+                                           target="_blank" class="btn btn-sm btn-outline-primary" title="View on OpenStreetMap">
+                                            <i class="bi bi-map"></i>
+                                        </a>
+                                        <a href="https://www.google.com/maps/search/?api=1&query={{ hospital.lat }},{{ hospital.lon }}" 
+                                           target="_blank" class="btn btn-sm btn-outline-danger mt-1" title="View on Google Maps">
+                                            <i class="bi bi-geo-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Display -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light py-3">
+                    <h4 class="mb-0 h5">
+                        <i class="bi bi-map"></i> Hospital Locations on Map
+                    </h4>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 500px;"></div>
+                </div>
+            </div>
+
+            <div class="alert alert-info border-0">
+                <i class="bi bi-info-circle-fill"></i>
+                <strong>Note:</strong> Hospital data is sourced from OpenStreetMap community contributors. 
+                For medical emergencies, always call your local emergency number (e.g., 112 in India). 
+                Verify hospital details before visiting.
+            </div>
+            {% endif %}
+
+            <!-- Info Box -->
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-lightbulb"></i> How to Use This Feature
+                    </h5>
+                    <ol class="mb-0">
+                        <li class="mb-2">
+                            <strong>Enter City Name:</strong> Type a major city name (e.g., "Lucknow", "Delhi", "Mumbai", "Bangalore")
+                        </li>
+                        <li class="mb-2">
+                            <strong>Choose Search Radius:</strong> Select how far to search (5-20 km recommended)
+                        </li>
+                        <li class="mb-2">
+                            <strong>Click Search:</strong> The system will find hospitals in that area
+                        </li>
+                        <li class="mb-2">
+                            <strong>View Results:</strong> See hospital names, addresses, distances, and contact info
+                        </li>
+                        <li class="mb-2">
+                            <strong>Use Map:</strong> Click map icons to see exact locations
+                        </li>
+                        <li class="mb-2">
+                            <strong>Get Directions:</strong> Click Google Maps or OpenStreetMap buttons for navigation
+                        </li>
+                    </ol>
+                    <hr class="my-3">
+                    <p class="text-muted mb-0 small">
+                        <strong>Technology:</strong> This feature uses OpenStreetMap Nominatim API for geocoding city names to coordinates, 
+                        and Overpass API for querying hospital data. Results depend on OpenStreetMap community data coverage in your area.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if results %}
+<!-- Leaflet CSS & JS for map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Initialize map centered on search location
+    const map = L.map('map').setView([{{ results.center.lat }}, {{ results.center.lon }}], 13);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Add marker for search center
+    L.marker([{{ results.center.lat }}, {{ results.center.lon }}])
+        .addTo(map)
+        .bindPopup('<strong>📍 Search Location</strong><br>{{ results.search_location }}')
+        .openPopup();
+    
+    // Add hospital markers with different colors
+    const hospitals = {{ results.hospitals | tojson }};
+    
+    hospitals.forEach((hospital, index) => {
+        // Create custom icon based on emergency status
+        const iconColor = hospital.emergency ? 'red' : 'blue';
+        const hospitalIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: ${iconColor}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+        
+        // Create popup content
+        let popupContent = `
+            <div style="min-width: 200px;">
+                <h6 style="margin-bottom: 8px; color: #0d6efd;">
+                    <i class="bi bi-hospital"></i> ${hospital.name}
+                </h6>
+                <p style="margin-bottom: 4px; font-size: 13px;">
+                    <strong>📍 Address:</strong><br>
+                    <span style="color: #6c757d;">${hospital.address}</span>
+                </p>
+                <p style="margin-bottom: 4px; font-size: 13px;">
+                    <strong>📏 Distance:</strong> ${hospital.distance}
+                </p>
+                ${hospital.phone ? `<p style="margin-bottom: 4px; font-size: 13px;"><strong>📞 Phone:</strong> ${hospital.phone}</p>` : ''}
+                ${hospital.emergency ? '<p style="margin-bottom: 4px; font-size: 13px;"><span class="badge bg-danger">Emergency Services Available</span></p>' : ''}
+                <div style="margin-top: 8px;">
+                    <a href="https://www.openstreetmap.org/?mlat=${hospital.lat}&mlon=${hospital.lon}#map=16/${hospital.lat}/${hospital.lon}" 
+                       target="_blank" class="btn btn-sm btn-outline-primary" style="margin-right: 4px;">
+                        <i class="bi bi-map"></i> OpenStreetMap
+                    </a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${hospital.lat},${hospital.lon}" 
+                       target="_blank" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-geo-alt"></i> Google Maps
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        // Add marker to map
+        L.marker([hospital.lat, hospital.lon], {icon: hospitalIcon})
+            .addTo(map)
+            .bindPopup(popupContent);
+    });
+
+    // Fit map to show all markers if there are hospitals
+    if (hospitals.length > 0) {
+        const bounds = hospitals.map(h => [h.lat, h.lon]);
+        bounds.push([{{ results.center.lat }}, {{ results.center.lon }}]);
+        map.fitBounds(bounds, {padding: [50, 50]});
+    }
+
+    console.log(`Map initialized with ${hospitals.length} hospitals`);
+</script>
+{% endif %}
+{% endblock %}

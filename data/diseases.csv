@@ -1,0 +1,101 @@
+import pandas as pd
+
+# Create updated diseases info with medicine recommendations
+diseases_info = [
+    {
+        'disease': 'Common Cold',
+        'description': 'A viral infection of the upper respiratory tract, particularly the nose and throat. It is usually mild and self-limiting.',
+        'common_symptoms': 'Runny nose, sore throat, cough, mild fever, sneezing',
+        'precautions': 'Rest adequately, drink plenty of fluids, use saline nasal drops, gargle with warm salt water, avoid close contact with others',
+        'when_to_seek_help': 'If symptoms last more than 10 days, high fever above 101.3F, severe headache, difficulty breathing, or worsening symptoms',
+        'general_medicines': 'Paracetamol (for fever/pain), Antihistamines (for runny nose), Cough syrup (for dry cough), Vitamin C supplements, Saline nasal spray',
+        'medicine_notes': 'Take paracetamol 500mg every 6 hours if fever. Drink warm water. Avoid antibiotics unless prescribed by doctor.'
+    },
+    {
+        'disease': 'Influenza',
+        'description': 'A contagious viral infection that attacks the respiratory system. It can cause mild to severe illness and may lead to complications.',
+        'common_symptoms': 'High fever, body aches, fatigue, dry cough, headache, chills',
+        'precautions': 'Get plenty of rest, stay hydrated, take over-the-counter pain relievers as needed, isolate from others, cover mouth when coughing',
+        'when_to_seek_help': 'Difficulty breathing, chest pain, persistent dizziness, confusion, severe weakness, high fever lasting more than 3 days',
+        'general_medicines': 'Paracetamol (for fever/body pain), Ibuprofen (for inflammation), Cough suppressants, Decongestants, Antiviral medications (if prescribed)',
+        'medicine_notes': 'Rest is crucial. Take paracetamol 500-650mg every 6 hours for fever. Oseltamivir may be prescribed by doctor within 48 hours of symptom onset.'
+    },
+    {
+        'disease': 'Migraine',
+        'description': 'A neurological condition characterized by intense, debilitating headaches often accompanied by other symptoms like nausea and sensitivity to light.',
+        'common_symptoms': 'Severe headache on one side, nausea, vomiting, sensitivity to light and sound, visual disturbances',
+        'precautions': 'Rest in a dark quiet room, apply cold compress, stay hydrated, identify and avoid triggers, maintain regular sleep schedule',
+        'when_to_seek_help': 'Sudden severe headache, headache with fever and stiff neck, confusion, seizures, double vision, weakness or numbness',
+        'general_medicines': 'Pain relievers (Paracetamol, Ibuprofen), Triptans (Sumatriptan - prescription), Anti-nausea medication, Excedrin Migraine, Magnesium supplements',
+        'medicine_notes': 'Take pain relievers at first sign of migraine. Rest in dark room. Caffeine in small amounts may help. Avoid triggers like certain foods, stress, lack of sleep.'
+    },
+    {
+        'disease': 'Allergy',
+        'description': 'An immune system reaction to a foreign substance (allergen) that is typically harmless to most people.',
+        'common_symptoms': 'Sneezing, runny nose, itchy eyes, skin rash, coughing, wheezing',
+        'precautions': 'Avoid known allergens, keep windows closed during high pollen seasons, use air purifiers, wash bedding frequently, shower after being outdoors',
+        'when_to_seek_help': 'Difficulty breathing, swelling of face or throat, rapid pulse, dizziness, severe skin reactions, anaphylaxis symptoms',
+        'general_medicines': 'Antihistamines (Cetirizine, Loratadine, Fexofenadine), Decongestants, Nasal corticosteroid sprays, Eye drops for itchy eyes, Calamine lotion for skin rash',
+        'medicine_notes': 'Take antihistamine once daily. Cetirizine 10mg or Loratadine 10mg. Use saline nasal spray. Avoid allergens. For severe allergies, carry epinephrine auto-injector if prescribed.'
+    },
+    {
+        'disease': 'Gastroenteritis',
+        'description': 'Inflammation of the stomach and intestines, typically resulting from bacterial or viral infection, causing diarrhea and vomiting.',
+        'common_symptoms': 'Diarrhea, nausea, vomiting, stomach cramps, abdominal pain, low-grade fever',
+        'precautions': 'Stay hydrated with oral rehydration solutions, eat bland foods, avoid dairy and spicy foods, wash hands frequently, rest',
+        'when_to_seek_help': 'Blood in stool, high fever, severe dehydration, inability to keep liquids down for 24 hours, symptoms lasting more than 2 days',
+        'general_medicines': 'ORS (Oral Rehydration Solution), Probiotics, Anti-diarrheal (Loperamide - if no fever), Anti-nausea (Ondansetron - prescription), Paracetamol for fever',
+        'medicine_notes': 'Most important is hydration with ORS. Eat BRAT diet (Banana, Rice, Apple, Toast). Avoid dairy, caffeine, spicy foods. Do not take anti-diarrheal if high fever or blood in stool.'
+    },
+    {
+        'disease': 'Bronchitis',
+        'description': 'Inflammation of the lining of the bronchial tubes, which carry air to and from the lungs. Can be acute or chronic.',
+        'common_symptoms': 'Persistent cough with mucus, fatigue, shortness of breath, chest discomfort, mild fever',
+        'precautions': 'Avoid smoke and irritants, use a humidifier, stay hydrated, get plenty of rest, avoid cold air exposure',
+        'when_to_seek_help': 'Cough lasting more than 3 weeks, high fever, coughing up blood, wheezing, difficulty breathing, recurring episodes',
+        'general_medicines': 'Cough expectorants (Guaifenesin), Cough suppressants (for dry cough at night), Bronchodilators (if wheezing - prescription), Paracetamol for fever, Honey for cough relief',
+        'medicine_notes': 'Drink warm fluids. Use humidifier. Guaifenesin helps loosen mucus. Avoid smoking. Antibiotics only if bacterial infection confirmed by doctor.'
+    },
+    {
+        'disease': 'Sinusitis',
+        'description': 'Inflammation or swelling of the tissue lining the sinuses, often caused by infection or allergies.',
+        'common_symptoms': 'Facial pain and pressure, nasal congestion, thick nasal discharge, headache, reduced sense of smell',
+        'precautions': 'Use saline nasal irrigation, apply warm compress to face, stay hydrated, use humidifier, avoid allergens and irritants',
+        'when_to_seek_help': 'Symptoms lasting more than 10 days, high fever, severe headache, vision changes, swelling around eyes, confusion',
+        'general_medicines': 'Nasal decongestant sprays (Oxymetazoline - max 3 days), Saline nasal irrigation, Pain relievers (Paracetamol, Ibuprofen), Antihistamines (if allergic), Nasal corticosteroid sprays',
+        'medicine_notes': 'Use saline nasal rinse 2-3 times daily. Steam inhalation helps. Decongestant spray should not be used more than 3 days. Warm compress on face reduces pain.'
+    },
+    {
+        'disease': 'Food Poisoning',
+        'description': 'Illness caused by eating contaminated food, often with bacteria, viruses, or parasites. Symptoms typically appear within hours of eating.',
+        'common_symptoms': 'Nausea, vomiting, diarrhea, abdominal cramps, fever, weakness',
+        'precautions': 'Stay hydrated, eat bland foods when able, avoid dairy and caffeine, rest, practice good food hygiene, wash hands thoroughly',
+        'when_to_seek_help': 'High fever, blood in stool, severe dehydration, diarrhea lasting more than 3 days, severe abdominal pain, neurological symptoms',
+        'general_medicines': 'ORS (Oral Rehydration Solution), Probiotics, Anti-nausea medication, Anti-diarrheal (only if no fever), Paracetamol for fever, Activated charcoal (early stage)',
+        'medicine_notes': 'Hydration is critical. Sip ORS frequently. Eat bland foods (rice, bananas, toast). Avoid dairy, caffeine, alcohol. Rest. Antibiotics only if bacterial cause confirmed.'
+    },
+    {
+        'disease': 'Viral Fever',
+        'description': 'A fever caused by a viral infection. It is the bodys natural response to fighting off viruses and is often accompanied by other symptoms.',
+        'common_symptoms': 'High fever, fatigue, body aches, headache, chills, weakness',
+        'precautions': 'Rest adequately, drink plenty of fluids, take lukewarm baths, wear light clothing, take fever reducers as recommended',
+        'when_to_seek_help': 'Fever above 103F, fever lasting more than 3 days, severe headache, rash, difficulty breathing, confusion, persistent vomiting',
+        'general_medicines': 'Paracetamol (for fever and pain), Ibuprofen (for inflammation), ORS for hydration, Multivitamins, Cold compress for fever',
+        'medicine_notes': 'Take paracetamol 500-650mg every 6 hours if fever above 100F. Drink plenty of fluids. Rest is essential. Do not take antibiotics for viral fever. Tepid sponging helps reduce fever.'
+    },
+    {
+        'disease': 'Pneumonia',
+        'description': 'An infection that inflames the air sacs in one or both lungs, which may fill with fluid. Can range from mild to life-threatening.',
+        'common_symptoms': 'High fever, productive cough, shortness of breath, chest pain, fatigue, chills',
+        'precautions': 'Get adequate rest, stay hydrated, take prescribed medications, avoid smoking, practice deep breathing exercises, isolate from vulnerable people',
+        'when_to_seek_help': 'Difficulty breathing, bluish lips or nails, high fever, confusion, severe chest pain, worsening symptoms, elderly or immunocompromised patients',
+        'general_medicines': 'Antibiotics (if bacterial - prescription required), Antivirals (if viral - prescription), Cough expectorants, Paracetamol for fever, Bronchodilators (if breathing difficulty), Oxygen therapy (severe cases)',
+        'medicine_notes': 'SEEK MEDICAL ATTENTION IMMEDIATELY. Pneumonia can be serious. Complete full course of antibiotics if prescribed. Do deep breathing exercises. Stay hydrated. Follow up with doctor.'
+    }
+]
+
+# Save to CSV
+df_diseases = pd.DataFrame(diseases_info)
+df_diseases.to_csv('AI-MediDetect/data/diseases.csv', index=False)
+print("✅ Diseases dataset updated with medicine recommendations!")
+print(f"Total diseases: {len(df_diseases)}")

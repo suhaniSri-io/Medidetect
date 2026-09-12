@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}AI MediDetect - Home{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold text-primary mb-3"><i class="bi bi-heart-pulse-fill"></i> AI MediDetect</h1>
+                <h2 class="h4 text-muted mb-4">AI-Based Disease Prediction & Healthcare Assistance System</h2>
+                <p class="lead text-secondary mb-4">An intelligent healthcare assistance system that uses machine learning to analyze symptoms and provide possible condition predictions. Built for educational purposes to demonstrate AI applications in healthcare.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg px-4"><i class="bi bi-activity"></i> Analyze Symptoms</a>
+                    <a href="{{ url_for('hospitals') }}" class="btn btn-outline-primary btn-lg px-4"><i class="bi bi-hospital"></i> Find Hospitals</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center mt-4 mt-lg-0">
+                <i class="bi bi-capsule-pill display-1 text-primary opacity-50"></i>
+                <i class="bi bi-heart display-2 text-danger opacity-25 ms-4"></i>
+                <i class="bi bi-activity display-3 text-success opacity-30 mt-3"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features-section py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Key Features</h2>
+            <p class="text-muted">What AI MediDetect offers</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3"><i class="bi bi-cpu-fill text-primary display-4"></i></div>
+                        <h4 class="card-title h5">AI-Powered Analysis</h4>
+                        <p class="card-text text-muted">Machine learning model trained on symptom patterns to predict possible conditions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3"><i class="bi bi-file-earmark-medical-fill text-success display-4"></i></div>
+                        <h4 class="card-title h5">Disease Information</h4>
+                        <p class="card-text text-muted">Detailed information about predicted conditions including precautions and guidance.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3"><i class="bi bi-geo-alt-fill text-danger display-4"></i></div>
+                        <h4 class="card-title h5">Hospital Finder</h4>
+                        <p class="card-text text-muted">Locate nearby hospitals using OpenStreetMap for immediate healthcare access.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="disclaimer-section py-4 bg-warning bg-opacity-10">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex align-items-start gap-3">
+                    <i class="bi bi-exclamation-triangle-fill text-warning fs-4"></i>
+                    <div>
+                        <h5 class="fw-bold mb-2">Important Medical Disclaimer</h5>
+                        <p class="mb-0 text-muted">AI MediDetect is an <strong>educational project</strong> designed to demonstrate machine learning applications in healthcare. The predictions provided are <strong>not medical diagnoses</strong> and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of qualified healthcare providers with any questions about medical conditions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

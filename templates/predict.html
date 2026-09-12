@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Disease Prediction - AI MediDetect{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-4">
+                <h1 class="display-5 fw-bold text-primary"><i class="bi bi-activity"></i> Symptom Analysis</h1>
+                <p class="lead text-muted">Select the symptoms you are experiencing</p>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" action="{{ url_for('predict') }}" id="predictionForm">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="bi bi-check-circle"></i> Select Your Symptoms</label>
+                            <p class="text-muted small">Select all symptoms that apply to you</p>
+                            <div class="row g-3">
+                                {% for symptom in symptoms_list %}
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="form-check symptom-check">
+                                        <input class="form-check-input" type="checkbox" name="symptoms" value="{{ symptom }}" id="symptom_{{ symptom }}">
+                                        <label class="form-check-label" for="symptom_{{ symptom }}">{{ symptoms_display[symptom] }}</label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="alert alert-info border-0" role="alert">
+                            <i class="bi bi-info-circle-fill"></i> <strong>Note:</strong> Select at least one symptom to proceed with the analysis.
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-magic"></i> Analyze Symptoms</button>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Home</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
