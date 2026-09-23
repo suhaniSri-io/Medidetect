@@ -4,7 +4,7 @@
 
 **Project By:** Suhani Srivastava  & Krishna Gupta
 **Program:** Master of Computer Applications (MCA)  
-**Year:** 2024-2026
+**Year:** 2026
 
 ---
 
