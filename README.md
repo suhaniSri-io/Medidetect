@@ -14,7 +14,7 @@
 - Python 3.12
 - pip (Python package manager)
 
-### Installation (Window)
+### Installation (Windows)
 
 1. **Open Command Prompt**
    ```cmd
