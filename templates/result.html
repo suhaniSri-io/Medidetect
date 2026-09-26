@@ -1,188 +1,170 @@
 {% extends "base.html" %}
-{% block title %}Prediction Result - AI MediDetect{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Page Header -->
-            <div class="text-center mb-4">
-                <h1 class="display-5 fw-bold text-primary"><i class="bi bi-clipboard-check"></i> Analysis Result</h1>
-                <p class="lead text-muted">Based on your symptoms</p>
+<div class="container py-4">
+
+    <!-- PREDICTION RESULT -->
+    <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+            <h2>📋 Prediction Result</h2>
+        </div>
+        <div class="card-body">
+            <h3>{{ predicted_disease|title }}</h3>
+            <p class="h5">Confidence:
+                <span class="badge bg-{% if confidence >= 80 %}success{% elif confidence >= 60 %}warning{% else %}danger{% endif %}">
+                    {{ confidence }}%
+                </span>
+            </p>
+
+            {% if confidence_warning %}
+            <div class="alert alert-warning">
+                ⚠️ {{ confidence_warning }}
+            </div>
+            {% endif %}
+
+            <h5 class="mt-3">Your Symptoms:</h5>
+            <div class="mb-3">
+                {% for symptom in selected_symptoms %}
+                    <span class="badge bg-info me-2 mb-2">
+                        {{ symptoms_display.get(symptom, symptom|title) }}
+                    </span>
+                {% endfor %}
             </div>
 
-            <!-- Main Result Card -->
-            <div class="card border-0 shadow-lg mb-4">
-                <div class="card-header bg-primary text-white py-3">
-                    <h3 class="mb-0 h4"><i class="bi bi-heart-pulse"></i> Possible Condition</h3>
-                </div>
-                <div class="card-body p-4 p-md-5">
-                    <div class="text-center mb-4">
-                        <h2 class="display-4 fw-bold text-primary mb-2">{{ predicted_disease }}</h2>
-                        <div class="progress mb-3" style="height: 30px;">
-                            <div class="progress-bar bg-success" role="progressbar" 
-                                 style="width: {{ confidence }}%;" 
-                                 aria-valuenow="{{ confidence }}" aria-valuemin="0" aria-valuemax="100">
-                                <strong>{{ "%.1f"|format(confidence) }}% Confidence</strong>
-                            </div>
-                        </div>
-                        <p class="text-muted">
-                            <i class="bi bi-info-circle"></i>
-                            This prediction is based on the symptoms you selected and our ML model analysis.
-                        </p>
-                    </div>
+            {% if disease_info %}
+            <h5>Additional Information:</h5>
+            <p>{{ disease_info.get('description', 'No additional info available') }}</p>
+            {% endif %}
+        </div>
+    </div>
 
-                    <!-- Selected Symptoms -->
-                    <div class="mb-4">
-                        <h5 class="fw-bold mb-3"><i class="bi bi-list-check"></i> Selected Symptoms</h5>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for symptom in selected_symptoms %}
-                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
-                                <i class="bi bi-check2"></i> {{ symptoms_display[symptom] }}
+    <!-- HOSPITAL RECOMMENDATION CARD -->
+    {% if hospital_recommendation %}
+    <div class="card mb-4 border-{% if hospital_urgency == 'critical' %}danger{% elif hospital_urgency == 'high' %}warning{% else %}info{% endif %}">
+        <div class="card-header bg-{% if hospital_urgency == 'critical' %}danger{% elif hospital_urgency == 'high' %}warning{% else %}info{% endif %} text-white">
+            <h3>🏥 Healthcare Facility Recommendation</h3>
+        </div>
+        <div class="card-body">
+
+            <!-- URGENCY INDICATOR -->
+            {% if hospital_urgency == 'critical' %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <h4 class="alert-heading">🚨 URGENT</h4>
+                <p>This condition requires immediate medical attention.</p>
+                <hr>
+                <p class="mb-0">{{ hospital_recommendation.advice }}</p>
+            </div>
+            {% elif hospital_urgency == 'high' %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <h4 class="alert-heading">⚠️ Important</h4>
+                <p>{{ hospital_recommendation.advice }}</p>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <p>{{ hospital_recommendation.advice }}</p>
+            </div>
+            {% endif %}
+
+            <!-- SPECIALTIES -->
+            <h5>Recommended Hospital Types:</h5>
+            <div class="mb-3">
+                {% for specialty in hospital_recommendation.specialties %}
+                    <span class="badge bg-secondary me-2 mb-2">
+                        {{ specialty|title }}
+                    </span>
+                {% endfor %}
+            </div>
+
+            <!-- FIND HOSPITALS BUTTON -->
+            <form action="{{ url_for('hospitals') }}" method="POST" style="display:inline;">
+                <input type="hidden" name="location" value="Lucknow">
+                <input type="hidden" name="radius" value="10000">
+                <button type="submit" class="btn btn-success btn-lg">
+                    🗺️ Find Hospitals Near You (Lucknow)
+                </button>
+            </form>
+
+            <p class="text-muted mt-2 small">
+                <em>You can change the location and radius on the hospital search page.</em>
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- MEDICINES & PRECAUTIONS -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h3>💊 Medical Guidance</h3>
+        </div>
+        <div class="card-body">
+
+            <h5>Common Medicines (Informational Only):</h5>
+            <ul class="mb-3">
+                {% for medicine in medicines %}
+                    <li>{{ medicine }}</li>
+                {% endfor %}
+            </ul>
+
+            <h5>Precautions:</h5>
+            <ul class="mb-3">
+                {% for precaution in precautions %}
+                    <li>{{ precaution }}</li>
+                {% endfor %}
+            </ul>
+
+            <h5 class="text-danger">⚠️ Red Flags - Seek Medical Help Immediately If:</h5>
+            <ul class="mb-3">
+                {% for flag in red_flags %}
+                    <li><strong>{{ flag }}</strong></li>
+                {% endfor %}
+            </ul>
+
+            <div class="alert alert-danger">
+                <strong>⚠️ Medical Disclaimer:</strong><br>
+                This is an educational tool, NOT a medical diagnosis or prescription.
+                Always consult a qualified healthcare professional before taking any action
+                based on these results. In emergencies, contact local emergency services immediately.
+            </div>
+        </div>
+    </div>
+
+    <!-- TOP PREDICTIONS -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>📊 Top 3 Possible Conditions</h4>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Condition</th>
+                        <th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prediction in top_predictions %}
+                    <tr>
+                        <td><strong>#{{ loop.index }}</strong></td>
+                        <td>{{ prediction.disease|title }}</td>
+                        <td>
+                            <span class="badge bg-{% if prediction.probability >= 80 %}success{% elif prediction.probability >= 60 %}warning{% else %}danger{% endif %}">
+                                {{ prediction.probability }}%
                             </span>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons - NEW DESIGN -->
-                    <div class="d-grid gap-3 d-md-flex justify-content-md-center mb-4">
-                        <button type="button" class="btn btn-danger btn-lg px-4" data-bs-toggle="modal" data-bs-target="#medicinesModal">
-                            <i class="bi bi-capsule-pill"></i> View Medicines
-                        </button>
-                        <a href="{{ url_for('hospitals') }}" class="btn btn-primary btn-lg px-4">
-                            <i class="bi bi-hospital"></i> Find Hospitals
-                        </a>
-                        <a href="{{ url_for('predict') }}" class="btn btn-outline-secondary btn-lg px-4">
-                            <i class="bi bi-arrow-counterclockwise"></i> New Analysis
-                        </a>
-                    </div>
-
-                    <!-- Disease Information Preview -->
-                    {% if disease_info %}
-                    <div class="alert alert-info border-0">
-                        <h6 class="fw-bold"><i class="bi bi-info-circle"></i> About {{ predicted_disease }}</h6>
-                        <p class="mb-0 small">{{ disease_info.description[:150] }}...</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Medical Disclaimer -->
-            <div class="alert alert-warning border-0 shadow-sm">
-                <div class="d-flex gap-3">
-                    <i class="bi bi-exclamation-triangle-fill fs-4"></i>
-                    <div>
-                        <h5 class="fw-bold mb-2">Important Medical Disclaimer</h5>
-                        <p class="mb-0">
-                            <strong>This result is for educational purposes only.</strong> 
-                            AI MediDetect uses machine learning to analyze symptom patterns, but this is 
-                            <strong>NOT a medical diagnosis</strong>. Always consult a qualified healthcare professional 
-                            for proper diagnosis and treatment.
-                        </p>
-                    </div>
-                </div>
-            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
 
-<!-- Medicines Modal -->
-<div class="modal fade" id="medicinesModal" tabindex="-1" aria-labelledby="medicinesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="medicinesModalLabel">
-                    <i class="bi bi-capsule-pill"></i> Medicine Recommendations for {{ predicted_disease }}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                {% if disease_info %}
-                
-                <!-- Disease Info Summary -->
-                <div class="card mb-3 border-0 bg-light">
-                    <div class="card-body">
-                        <h6 class="fw-bold"><i class="bi bi-file-earmark-medical"></i> About {{ predicted_disease }}</h6>
-                        <p class="mb-0 small">{{ disease_info.description }}</p>
-                    </div>
-                </div>
-
-                <!-- Medicine Recommendations -->
-                {% if disease_info.general_medicines %}
-                <div class="card mb-3 border-0">
-                    <div class="card-header bg-primary text-white">
-                        <h6 class="mb-0"><i class="bi bi-capsule"></i> Common Over-the-Counter (OTC) Medicines</h6>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">{{ disease_info.general_medicines }}</p>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if disease_info.medicine_notes %}
-                <div class="card mb-3 border-0">
-                    <div class="card-header bg-info text-white">
-                        <h6 class="mb-0"><i class="bi bi-info-circle"></i> Important Usage Notes</h6>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">{{ disease_info.medicine_notes }}</p>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if disease_info.precautions %}
-                <div class="card mb-3 border-0">
-                    <div class="card-header bg-success text-white">
-                        <h6 class="mb-0"><i class="bi bi-shield-check"></i> General Precautions</h6>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">{{ disease_info.precautions }}</p>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- CRITICAL DISCLAIMER -->
-                <div class="alert alert-danger border-0 mt-4">
-                    <div class="d-flex gap-3">
-                        <i class="bi bi-exclamation-triangle-fill fs-3"></i>
-                        <div>
-                            <h6 class="fw-bold mb-2">⚠️ CRITICAL MEDICAL DISCLAIMER</h6>
-                            <p class="mb-2 small">
-                                <strong>IMPORTANT:</strong> The medicine information shown above is for <strong>GENERAL EDUCATIONAL PURPOSES ONLY</strong>.
-                            </p>
-                            <ul class="mb-2 small">
-                                <li>❌ <strong>DO NOT self-medicate</strong> without consulting a qualified healthcare professional</li>
-                                <li>❌ These are <strong>NOT prescriptions</strong> and should not be treated as medical advice</li>
-                                <li>❌ Some medicines may interact with other medications you're taking</li>
-                                <li>❌ Dosage depends on age, weight, medical history, allergies, and other factors</li>
-                                <li>❌ Pregnant women, children, elderly, and people with chronic conditions need special care</li>
-                                <li>❌ This information does not replace professional medical consultation</li>
-                            </ul>
-                            <p class="mb-2 small">
-                                <strong>✅ ALWAYS CONSULT A DOCTOR or qualified healthcare provider</strong> before taking any medication, even over-the-counter drugs.
-                            </p>
-                            <p class="mb-0 small">
-                                <strong>AI MediDetect is an educational project only.</strong> This system provides symptom analysis and general medicine information for learning purposes and 
-                                <strong>is NOT a substitute for professional medical diagnosis, advice, or treatment.</strong> 
-                                Always seek the advice of qualified healthcare providers with any questions about medical conditions and medications.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {% else %}
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-circle"></i>
-                    <strong>Note:</strong> Medicine information is not available for this condition. Please consult a healthcare professional.
-                </div>
-                {% endif %}
-            </div>
-            <div class="modal-footer">
-                <a href="{{ url_for('hospitals') }}" class="btn btn-primary">
-                    <i class="bi bi-hospital"></i> Find Hospitals Near You
-                </a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
+    <!-- NAVIGATION -->
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('predict') }}" class="btn btn-outline-primary">← Start New Prediction</a>
+        <a href="{{ url_for('history') }}" class="btn btn-outline-secondary">📋 View History</a>
+        <a href="{{ url_for('about') }}" class="btn btn-outline-info">ℹ️ About</a>
     </div>
+
 </div>
 {% endblock %}
