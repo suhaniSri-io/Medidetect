@@ -1,0 +1,11 @@
+Actual Disease,Allergy,Bronchitis,Common Cold,Food Poisoning,Gastroenteritis,Influenza,Migraine,Pneumonia,Sinusitis,Viral Fever
+Allergy,17,1,5,0,0,0,3,0,4,0
+Bronchitis,1,19,2,0,0,0,1,5,1,1
+Common Cold,3,5,15,0,0,2,0,0,5,0
+Food Poisoning,0,0,0,19,11,0,0,0,0,0
+Gastroenteritis,0,0,1,13,16,0,0,0,0,0
+Influenza,0,0,2,0,1,16,1,3,1,6
+Migraine,0,0,0,0,0,0,28,0,1,1
+Pneumonia,0,7,0,0,2,4,0,15,0,2
+Sinusitis,5,3,7,0,0,1,1,0,13,0
+Viral Fever,1,2,0,0,0,7,4,2,3,11

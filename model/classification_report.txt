@@ -1,0 +1,16 @@
+                 precision    recall  f1-score   support
+
+        Allergy       0.63      0.57      0.60        30
+     Bronchitis       0.51      0.63      0.57        30
+    Common Cold       0.47      0.50      0.48        30
+ Food Poisoning       0.59      0.63      0.61        30
+Gastroenteritis       0.53      0.53      0.53        30
+      Influenza       0.53      0.53      0.53        30
+       Migraine       0.74      0.93      0.82        30
+      Pneumonia       0.60      0.50      0.55        30
+      Sinusitis       0.46      0.43      0.45        30
+    Viral Fever       0.52      0.37      0.43        30
+
+       accuracy                           0.56       300
+      macro avg       0.56      0.56      0.56       300
+   weighted avg       0.56      0.56      0.56       300

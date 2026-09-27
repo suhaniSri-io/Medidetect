@@ -1,68 +1,215 @@
 {% extends "base.html" %}
-{% block title %}Prediction History - AI MediDetect{% endblock %}
+{% block title %}Prediction History - MediDetect{% endblock %}
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
+
+<div class="container py-5">
+    <div class="row justify-content-center mb-4">
         <div class="col-lg-10">
+            <!-- Header -->
             <div class="text-center mb-4">
-                <h1 class="display-5 fw-bold text-primary"><i class="bi bi-clock-history"></i> Prediction History</h1>
-                <p class="lead text-muted">View your past symptom analyses</p>
+                <h1 class="display-5 fw-bold mb-2">
+                    <span style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        <i class="bi bi-clock-history"></i> Prediction History
+                    </span>
+                </h1>
+                <p class="lead text-muted">View your previous symptom analyses</p>
             </div>
+
             {% if predictions %}
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-primary text-white">
-                                <tr>
-                                    <th>Date & Time</th>
-                                    <th>Symptoms</th>
-                                    <th>Possible Condition</th>
-                                    <th>Confidence</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for pred in predictions|reverse %}
-                                <tr>
-                                    <td><small>{{ pred.timestamp }}</small></td>
-                                    <td>
-                                        {% set symptoms = pred.symptoms.split(',') %}
-                                        {% for symptom in symptoms[:3] %}
-                                        <span class="badge bg-secondary me-1">{{ symptoms_display.get(symptom, symptom) }}</span>
-                                        {% endfor %}
-                                        {% if symptoms|length > 3 %}
-                                        <span class="badge bg-light text-dark">+{{ symptoms|length - 3 }} more</span>
-                                        {% endif %}
-                                    </td>
-                                    <td><strong class="text-primary">{{ pred.predicted_disease }}</strong></td>
-                                    <td><span class="badge bg-success">{{ pred.confidence }}</span></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+            <!-- History Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow text-center p-4">
+                        <div style="font-size: 2rem; color: #0d6efd; margin-bottom: 1rem;">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Total Predictions</h6>
+                        <p class="h5 fw-bold mb-0">{{ predictions|length }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow text-center p-4">
+                        <div style="font-size: 2rem; color: #198754; margin-bottom: 1rem;">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Latest Check</h6>
+                        <p class="h6 fw-bold mb-0">
+                            {% if predictions %}
+                                {{ predictions[0].timestamp[:10] if predictions[0].timestamp }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow text-center p-4">
+                        <div style="font-size: 2rem; color: #0dcaf0; margin-bottom: 1rem;">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Unique Conditions</h6>
+                        <p class="h5 fw-bold mb-0">
+                            {{ predictions|map(attribute='predicted_disease')|unique|list|length }}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow text-center p-4">
+                        <div style="font-size: 2rem; color: #ffc107; margin-bottom: 1rem;">
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Avg Confidence</h6>
+                        <p class="h5 fw-bold mb-0">
+                            {% set total_conf = predictions|map(attribute='confidence')|map('float')|sum %}
+                            {% set avg_conf = ((total_conf / predictions|length) * 100)|round(1) %}
+                            {{ avg_conf }}%
+                        </p>
                     </div>
                 </div>
             </div>
-            <div class="text-center mt-4">
-                <a href="{{ url_for('predict') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> New Prediction</a>
-            </div>
-            {% else %}
-            <div class="card border-0 shadow-sm text-center py-5">
-                <div class="card-body">
-                    <i class="bi bi-clock-history display-1 text-muted mb-3"></i>
-                    <h3 class="fw-bold text-muted">No Predictions Yet</h3>
-                    <p class="text-muted">Your prediction history will appear here once you start analyzing symptoms.</p>
-                    <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg mt-3"><i class="bi bi-activity"></i> Start Analysis</a>
+
+            <!-- History Table -->
+            <div class="card border-0 shadow overflow-hidden">
+                <div class="card-header" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); border: none; padding: 1.5rem;">
+                    <h5 class="text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-list-ul"></i>
+                        Prediction Records
+                    </h5>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">Date</th>
+                                <th style="width: 25%;">Predicted Condition</th>
+                                <th style="width: 25%;">Symptoms</th>
+                                <th style="width: 15%;">Confidence</th>
+                                <th style="width: 20%;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prediction in predictions %}
+                            <tr>
+                                <!-- Date -->
+                                <td>
+                                    <small class="text-muted">
+                                        {{ prediction.timestamp[:10] if prediction.timestamp else 'N/A' }}
+                                    </small>
+                                </td>
+
+                                <!-- Predicted Disease -->
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-capsule text-danger"></i>
+                                        <strong>{{ prediction.predicted_disease|title }}</strong>
+                                    </div>
+                                </td>
+
+                                <!-- Symptoms - FIXED: Show ALL symptoms -->
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% set symptom_list = prediction.symptoms.split(',') if prediction.symptoms else [] %}
+                                        {% for symptom in symptom_list %}
+                                        <span class="badge bg-light text-dark small">
+                                            {{ symptom.strip()|title }}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+
+                                <!-- Confidence - FIXED: Multiply by 100 for percentage -->
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress" style="width: 60px; height: 6px;">
+                                            <div 
+                                                class="progress-bar" 
+                                                style="width: {{ (prediction.confidence|float * 100) }}%; background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);"
+                                            ></div>
+                                        </div>
+                                        <span class="badge bg-primary small">{{ (prediction.confidence|float * 100)|round(1) }}%</span>
+                                    </div>
+                                </td>
+
+                                <!-- Actions -->
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ url_for('predict') }}" class="btn btn-outline-primary" title="New prediction">
+                                            <i class="bi bi-plus"></i>
+                                        </a>
+                                        <button class="btn btn-outline-secondary" onclick="copySymptoms('{{ prediction.symptoms }}')" title="Copy symptoms">
+                                            <i class="bi bi-copy"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+            <!-- Clear History Button -->
+            <div class="mt-4">
+                <form method="POST" action="{{ url_for('history') }}" style="display: inline;">
+                    <button type="submit" name="action" value="clear" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to clear all history?');">
+                        <i class="bi bi-trash"></i> Clear History
+                    </button>
+                </form>
+            </div>
+
+            {% else %}
+            <!-- Empty State -->
+            <div class="card border-0 shadow-sm p-5 text-center">
+                <div style="font-size: 3rem; color: #6c757d; margin-bottom: 1rem;">
+                    <i class="bi bi-inbox"></i>
+                </div>
+                <h4 class="fw-bold mb-2">No History Yet</h4>
+                <p class="text-muted mb-4">
+                    You haven't made any predictions yet. Start by analyzing your symptoms!
+                </p>
+                <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-activity"></i> Start Symptom Analysis
+                </a>
+            </div>
             {% endif %}
-            <div class="card border-0 shadow-sm mt-4 bg-light">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-info-circle"></i> About History</h5>
-                    <p class="text-muted mb-0">Your prediction history is stored locally in a CSV file. This data is used for educational demonstration purposes only and is not shared with any third parties.</p>
+
+            <!-- Info Card -->
+            <div class="alert alert-info border-0 mt-5 d-flex align-items-start gap-3">
+                <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+                <div>
+                    <h6 class="mb-2 fw-bold">About Your History</h6>
+                    <p class="mb-0 small">
+                        Your prediction history is stored locally in this session. 
+                        The data includes your symptoms, predicted conditions, and confidence scores. 
+                        This history helps you track patterns and make informed decisions about your health.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Navigation -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('predict') }}" class="btn btn-primary">
+                    <i class="bi bi-activity"></i> New Prediction
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-house"></i> Home
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+function copySymptoms(symptoms) {
+    navigator.clipboard.writeText(symptoms).then(() => {
+        alert('Symptoms copied to clipboard!');
+    });
+}
+</script>
+
 {% endblock %}

@@ -1,4 +1,4 @@
-# AI MediDetect
+# MediDetect
 
 ## AI-Based Disease Prediction and Healthcare Assistance System
 
@@ -88,7 +88,7 @@ AI-MediDetect/
 ---
 ## 💊 Medicine Recommendations Feature
 
-AI MediDetect now includes **general medicine recommendations** for each predicted condition.
+MediDetect now includes **general medicine recommendations** for each predicted condition.
 
 ### What's Included:
 

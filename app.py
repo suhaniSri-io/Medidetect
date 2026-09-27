@@ -53,9 +53,10 @@ DEFAULT_RADIUS = 5000
 MIN_RADIUS = 500
 MAX_RADIUS = 50000
 
+# Nominatim requires a proper User-Agent with contact info
+# Format: Application Name/Version (Contact)
 USER_AGENT = (
-    "AI-MediDetect/2.0 "
-    "(educational healthcare project; contact project-maintainer)"
+    "AI-MediDetect/1.0 (Educational project - symptom checker with hospital finder)"
 )
 
 logging.basicConfig(
@@ -502,8 +503,15 @@ def get_health_advice(disease_name, disease_info=None):
 # -------------------------------------------------------------------
 
 def save_prediction(symptoms, predicted_disease, confidence):
+    """
+    Save prediction to history CSV.
+    confidence should be passed as decimal (0.0-1.0) and is converted to percentage for storage.
+    """
     try:
         HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+        # Convert decimal confidence to percentage for storage
+        confidence_percent = float(confidence) * 100 if isinstance(confidence, (int, float)) else 50.0
 
         history_row = {
             "timestamp": datetime.now().strftime(
@@ -511,7 +519,7 @@ def save_prediction(symptoms, predicted_disease, confidence):
             ),
             "symptoms": ",".join(symptoms),
             "predicted_disease": predicted_disease,
-            "confidence": f"{confidence:.1f}%",
+            "confidence": f"{confidence_percent:.1f}%",
         }
 
         if HISTORY_PATH.exists():
@@ -590,6 +598,10 @@ def decode_disease_label(class_value):
 
 
 def get_top_predictions(probabilities, limit=3):
+    """
+    Get top N predictions from probability array.
+    Returns probabilities as decimals (0.0-1.0), not percentages.
+    """
     probabilities = np.asarray(probabilities, dtype=float)
 
     class_values = getattr(
@@ -608,8 +620,8 @@ def get_top_predictions(probabilities, limit=3):
             {
                 "disease": decode_disease_label(class_value),
                 "probability": round(
-                    float(probabilities[position] * 100),
-                    2,
+                    float(probabilities[position]),  # Keep as decimal 0.0-1.0
+                    4,
                 ),
             }
         )
@@ -677,36 +689,48 @@ def geocode_location(location_query):
         }
 
     try:
+        logger.info("Geocoding location: %s", location_query)
+        
         response = requests.get(
             NOMINATIM_URL,
             params={
                 "q": location_query.strip(),
-                "format": "jsonv2",
+                "format": "json",
                 "limit": 1,
-                "addressdetails": 1,
+                "addressdetails": 0,
             },
             headers={
                 "User-Agent": USER_AGENT,
                 "Accept-Language": "en",
+                "Accept": "application/json",
             },
-            timeout=20,
+            timeout=10,
         )
 
-        if response.status_code != 200:
+        logger.info("Nominatim response status: %d", response.status_code)
+
+        if response.status_code == 429:
             return {
                 "error": (
-                    "Location service returned an error. "
-                    "Please try a more specific location."
+                    "Location service is rate-limited. Please wait a moment and try again."
+                )
+            }
+
+        if response.status_code != 200:
+            logger.error("Nominatim error: HTTP %d", response.status_code)
+            return {
+                "error": (
+                    "Location service error. Please try again or use a different location."
                 )
             }
 
         results = response.json()
 
         if not results:
+            logger.warning("No results for location: %s", location_query)
             return {
                 "error": (
-                    f"Location '{location_query}' was not found. "
-                    "Try a city, area, address, or pincode."
+                    f"Location '{location_query}' not found. Try a major city or area."
                 )
             }
 
@@ -717,48 +741,61 @@ def geocode_location(location_query):
         )
 
         if coordinates is None:
+            logger.error("Invalid coordinates from Nominatim")
             return {
                 "error": (
-                    "The location service returned invalid coordinates."
+                    "Could not determine valid coordinates for this location."
                 )
             }
+
+        logger.info("Location geocoded: lat=%s, lon=%s", coordinates[0], coordinates[1])
 
         return {
             "lat": coordinates[0],
             "lon": coordinates[1],
-            "display_name": result.get(
-                "display_name",
-                location_query,
-            ),
+            "display_name": result.get("display_name", location_query),
         }
 
     except requests.exceptions.Timeout:
+        logger.error("Geocode timeout for: %s", location_query)
         return {
             "error": (
-                "Location search timed out. Please try again."
+                "Location search took too long. Check your internet connection and try again."
             )
         }
 
-    except requests.exceptions.RequestException:
+    except requests.exceptions.ConnectionError:
+        logger.error("Connection error during geocoding")
         return {
             "error": (
-                "Could not connect to the location service. "
-                "Check your internet connection."
+                "Could not connect to location service. Check your internet connection."
             )
+        }
+
+    except requests.exceptions.RequestException as exc:
+        logger.error("Request error during geocoding: %s", exc)
+        return {
+            "error": (
+                "Error connecting to location service. Please try again."
+            )
+        }
+
+    except Exception as exc:
+        logger.error("Unexpected error during geocoding: %s", exc)
+        return {
+            "error": "Unexpected error during location lookup. Please try again."
         }
 
 
 def build_overpass_query(lat, lon, radius):
+    """Build Overpass QL query for hospitals and clinics"""
     return f"""
-[out:json];
+[out:json][timeout:30];
 (
   node["amenity"="hospital"](around:{radius},{lat},{lon});
   way["amenity"="hospital"](around:{radius},{lat},{lon});
-  relation["amenity"="hospital"](around:{radius},{lat},{lon});
-
   node["amenity"="clinic"](around:{radius},{lat},{lon});
   way["amenity"="clinic"](around:{radius},{lat},{lon});
-  relation["amenity"="clinic"](around:{radius},{lat},{lon});
 );
 out center;
 """
@@ -831,10 +868,13 @@ def format_address(tags, location_query=None):
 
 
 def request_overpass(query):
+    """Request hospital data from Overpass API with multiple fallbacks"""
     failures = []
 
-    for overpass_url in OVERPASS_URLS:
+    for attempt, overpass_url in enumerate(OVERPASS_URLS, 1):
         try:
+            logger.info("Overpass attempt %d: %s", attempt, overpass_url)
+            
             response = requests.post(
                 overpass_url,
                 data={"data": query},
@@ -842,28 +882,46 @@ def request_overpass(query):
                     "User-Agent": USER_AGENT,
                     "Accept": "application/json",
                 },
-                timeout=(15, 60),
+                timeout=30,  # Single timeout value
             )
+
+            logger.info("Overpass response status: %d", response.status_code)
 
             if response.status_code == 200:
-                return response.json()
+                data = response.json()
+                logger.info("Overpass query successful, found %d elements", len(data.get("elements", [])))
+                return data
 
-            failures.append(
-                f"{overpass_url} returned HTTP "
-                f"{response.status_code}"
-            )
+            if response.status_code == 429:
+                failures.append("Overpass rate limited (try in 1 minute)")
+            elif response.status_code == 504:
+                failures.append("Overpass service temporarily unavailable")
+            else:
+                failures.append(f"HTTP {response.status_code}")
 
         except requests.exceptions.Timeout:
-            failures.append(f"{overpass_url} timed out")
+            logger.warning("Overpass timeout on attempt %d", attempt)
+            failures.append("Request timeout")
+
+        except requests.exceptions.ConnectionError as exc:
+            logger.warning("Overpass connection error: %s", exc)
+            failures.append("Connection failed")
 
         except requests.exceptions.RequestException as exc:
-            failures.append(
-                f"{overpass_url} connection failed: {exc}"
-            )
+            logger.warning("Overpass request error: %s", exc)
+            failures.append(f"Request error: {str(exc)[:50]}")
 
-        time.sleep(1)
+        except Exception as exc:
+            logger.warning("Unexpected error with Overpass: %s", exc)
+            failures.append(f"Error: {str(exc)[:50]}")
 
-    raise RuntimeError(" | ".join(failures))
+        # Wait before trying next server
+        if attempt < len(OVERPASS_URLS):
+            time.sleep(2)
+
+    error_msg = " | ".join(failures) if failures else "No hospital data available"
+    logger.error("Overpass API failed: %s", error_msg)
+    raise RuntimeError(error_msg)
 
 
 def find_nearby_hospitals(
@@ -877,31 +935,67 @@ def find_nearby_hospitals(
     coordinates = valid_coordinates(lat, lon)
 
     if coordinates is None:
+        # Need to geocode location first
+        if not location_query or not location_query.strip():
+            return {
+                "error": "Please enter a location (city, area, or address)."
+            }
+        
+        logger.info("Starting geocoding for: %s", location_query)
         geocoded = geocode_location(location_query)
 
         if "error" in geocoded:
+            logger.warning("Geocoding failed: %s", geocoded["error"])
             return geocoded
 
         lat = geocoded["lat"]
         lon = geocoded["lon"]
         search_location = geocoded["display_name"]
+        logger.info("Geocoding successful: %s (lat=%s, lon=%s)", search_location, lat, lon)
 
     else:
         lat, lon = coordinates
         search_location = location_query or f"{lat}, {lon}"
+        logger.info("Using provided coordinates: lat=%s, lon=%s", lat, lon)
 
     query = build_overpass_query(lat, lon, radius)
 
     try:
+        logger.info("Requesting hospital data for %s (radius: %d m)", search_location, radius)
         data = request_overpass(query)
     except Exception as exc:
-        logger.exception("Hospital search failed: %s", exc)
-        return {
-            "error": (
-                "Hospital data service is temporarily unavailable. "
-                "Please try again shortly."
-            )
-        }
+        error_str = str(exc)
+        logger.exception("Hospital search failed: %s", error_str)
+        
+        # Provide more specific error messages
+        if "rate limited" in error_str.lower():
+            return {
+                "error": (
+                    "Hospital database is temporarily rate-limited. "
+                    "Please wait 1-2 minutes and try again."
+                )
+            }
+        elif "timeout" in error_str.lower():
+            return {
+                "error": (
+                    "Hospital database response took too long. "
+                    "Please try with a smaller radius or try again shortly."
+                )
+            }
+        elif "temporarily unavailable" in error_str.lower():
+            return {
+                "error": (
+                    "Hospital database is temporarily offline. "
+                    "Please try again in a few minutes."
+                )
+            }
+        else:
+            return {
+                "error": (
+                    f"Could not retrieve hospital data: {error_str}. "
+                    "Please try a different location or try again shortly."
+                )
+            }
 
     hospitals = []
     seen = set()
@@ -1069,7 +1163,9 @@ def predict():
             limit=3,
         )
 
-        confidence = top_predictions[0]["probability"]
+        # Confidence from top prediction as decimal (0.0-1.0)
+        confidence = float(probabilities[np.argmax(probabilities)])
+        
         disease_info = get_disease_info(predicted_disease)
         health_advice = get_health_advice(
             predicted_disease,
@@ -1078,7 +1174,7 @@ def predict():
 
         confidence_warning = None
 
-        if confidence < 60:
+        if confidence < 0.5:
             confidence_warning = (
                 "The model confidence is low. This result is uncertain "
                 "and must not be treated as a diagnosis."
@@ -1091,13 +1187,13 @@ def predict():
         save_prediction(
             valid_symptoms,
             predicted_disease,
-            confidence,
+            confidence,  # Passed as decimal (0.0-1.0), converted to % in save_prediction
         )
 
         return render_template(
             "result.html",
             predicted_disease=predicted_disease,
-            confidence=confidence,
+            confidence=confidence,  # As decimal (0.0-1.0) for template
             top_predictions=top_predictions,
             selected_symptoms=valid_symptoms,
             symptoms_display=SYMPTOMS_DISPLAY,

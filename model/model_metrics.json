@@ -1,0 +1,87 @@
+{
+    "model_name": "Bernoulli Naive Bayes",
+    "train_accuracy": 0.6308,
+    "test_accuracy": 0.5633,
+    "weighted_f1": 0.5576,
+    "macro_f1": 0.5576,
+    "cross_validation_f1_scores": [
+        0.6114,
+        0.5779,
+        0.5572,
+        0.5693,
+        0.5364
+    ],
+    "mean_cross_validation_f1": 0.5705,
+    "class_metrics": [
+        {
+            "disease": "Allergy",
+            "precision": 0.6296,
+            "recall": 0.5667,
+            "f1_score": 0.5965,
+            "support": 30
+        },
+        {
+            "disease": "Bronchitis",
+            "precision": 0.5135,
+            "recall": 0.6333,
+            "f1_score": 0.5672,
+            "support": 30
+        },
+        {
+            "disease": "Common Cold",
+            "precision": 0.4688,
+            "recall": 0.5,
+            "f1_score": 0.4839,
+            "support": 30
+        },
+        {
+            "disease": "Food Poisoning",
+            "precision": 0.5938,
+            "recall": 0.6333,
+            "f1_score": 0.6129,
+            "support": 30
+        },
+        {
+            "disease": "Gastroenteritis",
+            "precision": 0.5333,
+            "recall": 0.5333,
+            "f1_score": 0.5333,
+            "support": 30
+        },
+        {
+            "disease": "Influenza",
+            "precision": 0.5333,
+            "recall": 0.5333,
+            "f1_score": 0.5333,
+            "support": 30
+        },
+        {
+            "disease": "Migraine",
+            "precision": 0.7368,
+            "recall": 0.9333,
+            "f1_score": 0.8235,
+            "support": 30
+        },
+        {
+            "disease": "Pneumonia",
+            "precision": 0.6,
+            "recall": 0.5,
+            "f1_score": 0.5455,
+            "support": 30
+        },
+        {
+            "disease": "Sinusitis",
+            "precision": 0.4643,
+            "recall": 0.4333,
+            "f1_score": 0.4483,
+            "support": 30
+        },
+        {
+            "disease": "Viral Fever",
+            "precision": 0.5238,
+            "recall": 0.3667,
+            "f1_score": 0.4314,
+            "support": 30
+        }
+    ]
+}

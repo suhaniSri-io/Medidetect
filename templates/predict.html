@@ -1,41 +1,323 @@
 {% extends "base.html" %}
-{% block title %}Disease Prediction - AI MediDetect{% endblock %}
+{% block title %}Disease Prediction - MediDetect{% endblock %}
 {% block content %}
-<div class="container">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="text-center mb-4">
-                <h1 class="display-5 fw-bold text-primary"><i class="bi bi-activity"></i> Symptom Analysis</h1>
-                <p class="lead text-muted">Select the symptoms you are experiencing</p>
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5 fade-in">
+                <div class="mb-3">
+                    <i class="bi bi-activity display-3 text-primary"></i>
+                </div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <span style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        Symptom Analysis
+                    </span>
+                </h1>
+                <p class="lead text-muted mb-0">Select the symptoms you are experiencing to get an AI-powered health assessment</p>
             </div>
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4 p-md-5">
+
+            <!-- Progress Indicator -->
+            <div class="card border-0 shadow mb-4 p-4">
+                <div class="row text-center g-4">
+                    <div class="col-md-4">
+                        <div class="step-indicator active">
+                            <div class="step-number">1</div>
+                            <p class="step-label">Select Symptoms</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-indicator">
+                            <div class="step-number">2</div>
+                            <p class="step-label">AI Analysis</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-indicator">
+                            <div class="step-number">3</div>
+                            <p class="step-label">Results</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Form Card -->
+            <div class="card border-0 shadow-lg overflow-hidden fade-in">
+                <div class="card-header" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); border: none; padding: 2rem;">
+                    <h4 class="mb-0 text-white d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Select Your Symptoms
+                    </h4>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
                     <form method="POST" action="{{ url_for('predict') }}" id="predictionForm">
-                        <div class="mb-4">
-                            <label class="form-label fw-bold"><i class="bi bi-check-circle"></i> Select Your Symptoms</label>
-                            <p class="text-muted small">Select all symptoms that apply to you</p>
-                            <div class="row g-3">
+                        <!-- Instruction Alert -->
+                        <div class="alert alert-info border-0 d-flex align-items-start gap-3 mb-4">
+                            <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+                            <div>
+                                <h6 class="mb-1">How to use</h6>
+                                <p class="mb-0 small">Check all symptoms that apply to you. Select at least one symptom to proceed. The AI model will analyze your symptoms and provide possible health conditions.</p>
+                            </div>
+                        </div>
+
+                        <!-- Symptoms Grid -->
+                        <div class="mb-5">
+                            <label class="form-label fw-bold mb-4 d-flex align-items-center gap-2">
+                                <i class="bi bi-heart-pulse"></i>
+                                Choose Your Symptoms
+                            </label>
+
+                            <div class="symptoms-grid">
                                 {% for symptom in symptoms_list %}
-                                <div class="col-md-4 col-sm-6">
-                                    <div class="form-check symptom-check">
-                                        <input class="form-check-input" type="checkbox" name="symptoms" value="{{ symptom }}" id="symptom_{{ symptom }}">
-                                        <label class="form-check-label" for="symptom_{{ symptom }}">{{ symptoms_display[symptom] }}</label>
-                                    </div>
+                                <div class="symptom-card">
+                                    <input 
+                                        class="form-check-input symptom-checkbox" 
+                                        type="checkbox" 
+                                        name="symptoms" 
+                                        value="{{ symptom }}" 
+                                        id="symptom_{{ symptom }}"
+                                    >
+                                    <label class="form-check-label symptom-label" for="symptom_{{ symptom }}">
+                                        <span class="symptom-icon">
+                                            <i class="bi bi-check-lg"></i>
+                                        </span>
+                                        <span class="symptom-text">{{ symptoms_display[symptom] }}</span>
+                                    </label>
                                 </div>
                                 {% endfor %}
                             </div>
                         </div>
-                        <div class="alert alert-info border-0" role="alert">
-                            <i class="bi bi-info-circle-fill"></i> <strong>Note:</strong> Select at least one symptom to proceed with the analysis.
+
+                        <!-- Selected Count Badge -->
+                        <div class="alert alert-light border-0 p-3 mb-4" id="selectedCount" style="display: none;">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-check-all text-success"></i>
+                                <span>
+                                    <strong id="countNumber">0</strong> symptom(s) selected
+                                </span>
+                            </div>
                         </div>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-magic"></i> Analyze Symptoms</button>
-                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Home</a>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 gap-sm-3">
+                            <button 
+                                type="submit" 
+                                class="btn btn-primary btn-lg"
+                                id="analyzeBtn"
+                            >
+                                <i class="bi bi-magic"></i> 
+                                Analyze Symptoms
+                            </button>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-left"></i> 
+                                Back to Home
+                            </a>
+                        </div>
+
+                        <!-- Disclaimer -->
+                        <div class="alert alert-warning border-0 mt-4 d-flex align-items-start gap-3">
+                            <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
+                            <div>
+                                <h6 class="mb-1">Medical Disclaimer</h6>
+                                <p class="mb-0 small">This tool provides educational analysis only. It is <strong>NOT</strong> a medical diagnosis. Always consult with a qualified healthcare professional for proper medical advice.</p>
+                            </div>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Information Cards -->
+            <div class="row mt-5 g-3">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow h-100 text-center p-4">
+                        <div style="font-size: 2rem; color: #0d6efd; margin-bottom: 1rem;">
+                            <i class="bi bi-cpu"></i>
+                        </div>
+                        <h5 class="fw-bold">AI-Powered</h5>
+                        <p class="text-muted small">Advanced machine learning analyzes your symptoms</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow h-100 text-center p-4">
+                        <div style="font-size: 2rem; color: #198754; margin-bottom: 1rem;">
+                            <i class="bi bi-lightning"></i>
+                        </div>
+                        <h5 class="fw-bold">Fast Results</h5>
+                        <p class="text-muted small">Get instant predictions in seconds</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow h-100 text-center p-4">
+                        <div style="font-size: 2rem; color: #dc3545; margin-bottom: 1rem;">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h5 class="fw-bold">Safe & Private</h5>
+                        <p class="text-muted small">Your data stays secure and private</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.symptoms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.2rem;
+}
+
+.symptom-card {
+    position: relative;
+}
+
+.symptom-checkbox {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.symptom-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background: #ffffff;
+    margin: 0;
+}
+
+.symptom-checkbox:checked + .symptom-label {
+    border-color: #0d6efd;
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(13, 110, 253, 0.05) 100%);
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+    transform: translateY(-3px);
+}
+
+.symptom-label:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+    transform: translateY(-2px);
+}
+
+.symptom-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #e9ecef;
+    border-radius: 50%;
+    color: #6c757d;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.symptom-checkbox:checked + .symptom-label .symptom-icon {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    color: white;
+    transform: scale(1.15);
+}
+
+.symptom-text {
+    font-weight: 500;
+    color: var(--dark-text);
+    transition: color 0.3s ease;
+}
+
+.step-indicator {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    font-weight: 700;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.step-indicator.active .step-number {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+}
+
+.step-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6c757d;
+    margin: 0;
+}
+
+.step-indicator.active .step-label {
+    color: var(--dark-text);
+}
+
+@media (max-width: 768px) {
+    .symptoms-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.8rem;
+    }
+
+    .symptom-label {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('predictionForm');
+    const checkboxes = document.querySelectorAll('.symptom-checkbox');
+    const selectedCount = document.getElementById('selectedCount');
+    const countNumber = document.getElementById('countNumber');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    // Update selected count
+    function updateCount() {
+        const checked = document.querySelectorAll('.symptom-checkbox:checked').length;
+        if (checked > 0) {
+            countNumber.textContent = checked;
+            selectedCount.style.display = 'block';
+            analyzeBtn.disabled = false;
+        } else {
+            selectedCount.style.display = 'none';
+            analyzeBtn.disabled = true;
+        }
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateCount);
+    });
+
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const checkedSymptoms = document.querySelectorAll('.symptom-checkbox:checked');
+        if (checkedSymptoms.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one symptom to proceed.');
+            return false;
+        }
+    });
+
+    // Initial setup
+    updateCount();
+});
+</script>
 {% endblock %}

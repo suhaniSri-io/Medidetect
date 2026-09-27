@@ -1,170 +1,285 @@
 {% extends "base.html" %}
-
+{% block title %}Results - MediDetect{% endblock %}
 {% block content %}
-<div class="container py-4">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Main Prediction Result Card -->
+            <div class="card border-0 shadow-lg overflow-hidden fade-in mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); border: none; padding: 2.5rem;">
+                    <h3 class="text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Analysis Result
+                    </h3>
+                </div>
+                
+                <div class="card-body p-4 p-lg-5">
+                    {% if predicted_disease %}
+                    <div class="row align-items-center mb-4">
+                        <div class="col-lg-8">
+                            <h1 class="display-6 fw-bold mb-3">
+                                <span style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                                    {{ predicted_disease|title }}
+                                </span>
+                            </h1>
+                            
+                            {% if confidence is defined and confidence %}
+                            <div class="mb-4">
+                                <label class="text-muted small fw-bold mb-2 d-block">Model Confidence</label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="flex-grow-1">
+                                        <div class="progress" style="height: 10px; border-radius: 10px;">
+                                            <div 
+                                                class="progress-bar" 
+                                                style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); width: {{ (confidence|float * 100)|round(1) }}%"
+                                                role="progressbar"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-primary text-white fw-bold" style="min-width: 60px;">{{ (confidence|float * 100)|round(1) }}%</span>
+                                </div>
+                            </div>
+                            {% endif %}
 
-    <!-- PREDICTION RESULT -->
-    <div class="card mb-4 border-primary">
-        <div class="card-header bg-primary text-white">
-            <h2>📋 Prediction Result</h2>
-        </div>
-        <div class="card-body">
-            <h3>{{ predicted_disease|title }}</h3>
-            <p class="h5">Confidence:
-                <span class="badge bg-{% if confidence >= 80 %}success{% elif confidence >= 60 %}warning{% else %}danger{% endif %}">
-                    {{ confidence }}%
-                </span>
-            </p>
+                            {% if confidence_warning %}
+                            <div class="alert alert-warning border-0 d-flex align-items-start gap-3">
+                                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
+                                <div>
+                                    <h6 class="mb-1">Low Confidence</h6>
+                                    <p class="mb-0 small">{{ confidence_warning }}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
 
-            {% if confidence_warning %}
-            <div class="alert alert-warning">
-                ⚠️ {{ confidence_warning }}
-            </div>
-            {% endif %}
-
-            <h5 class="mt-3">Your Symptoms:</h5>
-            <div class="mb-3">
-                {% for symptom in selected_symptoms %}
-                    <span class="badge bg-info me-2 mb-2">
-                        {{ symptoms_display.get(symptom, symptom|title) }}
-                    </span>
-                {% endfor %}
-            </div>
-
-            {% if disease_info %}
-            <h5>Additional Information:</h5>
-            <p>{{ disease_info.get('description', 'No additional info available') }}</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- HOSPITAL RECOMMENDATION CARD -->
-    {% if hospital_recommendation %}
-    <div class="card mb-4 border-{% if hospital_urgency == 'critical' %}danger{% elif hospital_urgency == 'high' %}warning{% else %}info{% endif %}">
-        <div class="card-header bg-{% if hospital_urgency == 'critical' %}danger{% elif hospital_urgency == 'high' %}warning{% else %}info{% endif %} text-white">
-            <h3>🏥 Healthcare Facility Recommendation</h3>
-        </div>
-        <div class="card-body">
-
-            <!-- URGENCY INDICATOR -->
-            {% if hospital_urgency == 'critical' %}
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <h4 class="alert-heading">🚨 URGENT</h4>
-                <p>This condition requires immediate medical attention.</p>
-                <hr>
-                <p class="mb-0">{{ hospital_recommendation.advice }}</p>
-            </div>
-            {% elif hospital_urgency == 'high' %}
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <h4 class="alert-heading">⚠️ Important</h4>
-                <p>{{ hospital_recommendation.advice }}</p>
-            </div>
-            {% else %}
-            <div class="alert alert-info">
-                <p>{{ hospital_recommendation.advice }}</p>
-            </div>
-            {% endif %}
-
-            <!-- SPECIALTIES -->
-            <h5>Recommended Hospital Types:</h5>
-            <div class="mb-3">
-                {% for specialty in hospital_recommendation.specialties %}
-                    <span class="badge bg-secondary me-2 mb-2">
-                        {{ specialty|title }}
-                    </span>
-                {% endfor %}
-            </div>
-
-            <!-- FIND HOSPITALS BUTTON -->
-            <form action="{{ url_for('hospitals') }}" method="POST" style="display:inline;">
-                <input type="hidden" name="location" value="Lucknow">
-                <input type="hidden" name="radius" value="10000">
-                <button type="submit" class="btn btn-success btn-lg">
-                    🗺️ Find Hospitals Near You (Lucknow)
-                </button>
-            </form>
-
-            <p class="text-muted mt-2 small">
-                <em>You can change the location and radius on the hospital search page.</em>
-            </p>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- MEDICINES & PRECAUTIONS -->
-    <div class="card mb-4">
-        <div class="card-header bg-success text-white">
-            <h3>💊 Medical Guidance</h3>
-        </div>
-        <div class="card-body">
-
-            <h5>Common Medicines (Informational Only):</h5>
-            <ul class="mb-3">
-                {% for medicine in medicines %}
-                    <li>{{ medicine }}</li>
-                {% endfor %}
-            </ul>
-
-            <h5>Precautions:</h5>
-            <ul class="mb-3">
-                {% for precaution in precautions %}
-                    <li>{{ precaution }}</li>
-                {% endfor %}
-            </ul>
-
-            <h5 class="text-danger">⚠️ Red Flags - Seek Medical Help Immediately If:</h5>
-            <ul class="mb-3">
-                {% for flag in red_flags %}
-                    <li><strong>{{ flag }}</strong></li>
-                {% endfor %}
-            </ul>
-
-            <div class="alert alert-danger">
-                <strong>⚠️ Medical Disclaimer:</strong><br>
-                This is an educational tool, NOT a medical diagnosis or prescription.
-                Always consult a qualified healthcare professional before taking any action
-                based on these results. In emergencies, contact local emergency services immediately.
-            </div>
-        </div>
-    </div>
-
-    <!-- TOP PREDICTIONS -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4>📊 Top 3 Possible Conditions</h4>
-        </div>
-        <div class="card-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Condition</th>
-                        <th>Confidence</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for prediction in top_predictions %}
-                    <tr>
-                        <td><strong>#{{ loop.index }}</strong></td>
-                        <td>{{ prediction.disease|title }}</td>
-                        <td>
-                            <span class="badge bg-{% if prediction.probability >= 80 %}success{% elif prediction.probability >= 60 %}warning{% else %}danger{% endif %}">
-                                {{ prediction.probability }}%
+                    <!-- Selected Symptoms -->
+                    {% if selected_symptoms %}
+                    <div class="mt-5 pt-4 border-top">
+                        <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-heart-pulse"></i>
+                            Your Symptoms
+                        </h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for symptom in selected_symptoms %}
+                            <span class="badge" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); font-size: 0.95rem;">
+                                <i class="bi bi-check-lg"></i> {{ symptom|title }}
                             </span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Top Predictions -->
+            {% if top_predictions and top_predictions|length > 0 %}
+            <div class="card border-0 shadow-lg overflow-hidden fade-in mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #0dcaf0 0%, #0db5d9 100%); border: none; padding: 1.5rem;">
+                    <h5 class="text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-graph-up"></i>
+                        Top Possible Conditions
+                    </h5>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <div class="row g-3">
+                        {% for prediction in top_predictions %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 h-100 text-center p-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #f0f4ff 100%);">
+                                <div class="mb-3">
+                                    <span class="badge bg-primary" style="font-size: 1.1rem;">
+                                        #{{ loop.index }}
+                                    </span>
+                                </div>
+                                <h6 class="fw-bold mb-2">{{ prediction.disease|title }}</h6>
+                                <div class="progress mb-3" style="height: 6px;">
+                                    <div 
+                                        class="progress-bar" 
+                                        style="background: linear-gradient(135deg, #0dcaf0 0%, #0db5d9 100%); width: {{ (prediction.probability|float * 100)|round(1) }}%"
+                                    ></div>
+                                </div>
+                                <p class="mb-0 text-muted small">
+                                    <strong style="color: #0d6efd;">{{ (prediction.probability|float * 100)|round(1) }}%</strong> match
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Medical Guidance Section -->
+            {% if medicines or precautions or red_flags %}
+            <div class="card border-0 shadow-lg overflow-hidden fade-in mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #198754 0%, #157347 100%); border: none; padding: 1.5rem;">
+                    <h5 class="text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-capsule"></i>
+                        Medical Guidance
+                    </h5>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <div class="row g-4">
+                        <!-- Medicines -->
+                        {% if medicines and medicines|length > 0 %}
+                        <div class="col-lg-6">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-pill text-success"></i>
+                                Common Medicines (Informational)
+                            </h6>
+                            <div class="list-group">
+                                {% for medicine in medicines %}
+                                <div class="list-group-item border-0 bg-transparent p-3 ps-0 border-bottom">
+                                    <div class="d-flex gap-3">
+                                        <i class="bi bi-check-circle-fill text-success flex-shrink-0 mt-1"></i>
+                                        <p class="mb-0 text-muted">{{ medicine }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Precautions -->
+                        {% if precautions and precautions|length > 0 %}
+                        <div class="col-lg-6">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-shield-check text-primary"></i>
+                                Precautions
+                            </h6>
+                            <div class="list-group">
+                                {% for precaution in precautions %}
+                                <div class="list-group-item border-0 bg-transparent p-3 ps-0 border-bottom">
+                                    <div class="d-flex gap-3">
+                                        <i class="bi bi-check-circle-fill text-primary flex-shrink-0 mt-1"></i>
+                                        <p class="mb-0 text-muted">{{ precaution }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Red Flags Warning -->
+                    {% if red_flags and red_flags|length > 0 %}
+                    <div class="alert alert-danger border-0 mt-4 d-flex align-items-start gap-3">
+                        <i class="bi bi-exclamation-circle-fill flex-shrink-0 mt-1" style="font-size: 1.3rem;"></i>
+                        <div>
+                            <h6 class="mb-2 fw-bold">⚠️ Seek Medical Help Immediately If:</h6>
+                            <ul class="mb-0 ps-3">
+                                {% for flag in red_flags %}
+                                <li class="mb-1">{{ flag }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Hospital Recommendation -->
+            <div class="card border-0 shadow-lg overflow-hidden fade-in mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #0dcaf0 0%, #0db5d9 100%); border: none; padding: 1.5rem;">
+                    <h5 class="text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-hospital"></i>
+                        Healthcare Facility Recommendation
+                    </h5>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <div class="alert alert-info border-0 d-flex align-items-start gap-3 mb-4">
+                        <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+                        <div>
+                            <h6 class="mb-2 fw-bold">📋 Medical Consultation Recommended</h6>
+                            <p class="mb-0 small">
+                                Based on your symptoms, we recommend scheduling a consultation with a qualified healthcare professional 
+                                to receive a proper diagnosis and treatment plan.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold mb-3">Recommended Facility Types:</h6>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        {% set facility_types = ['General Hospital', 'Multi-Specialty Hospital', 'Clinic', 'Diagnostic Center'] %}
+                        {% for facility in facility_types %}
+                        <span class="badge bg-light text-dark" style="font-size: 0.95rem;">
+                            <i class="bi bi-check"></i> {{ facility }}
+                        </span>
+                        {% endfor %}
+                    </div>
+
+                    <p class="text-muted small mb-3">
+                        <em>Use the hospital finder to locate healthcare facilities near you.</em>
+                    </p>
+                    <a href="{{ url_for('hospitals') }}" class="btn btn-success btn-lg">
+                        <i class="bi bi-geo-alt-fill"></i> Find Hospitals Near You
+                    </a>
+
+                    <div class="alert alert-light border-0 p-3 mt-4">
+                        <p class="mb-0 small text-muted">
+                            <strong>Emergency?</strong> Call 112 (India) or your local emergency number immediately.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Disclaimer -->
+            <div class="alert alert-danger border-0 d-flex align-items-start gap-3 mb-4">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1" style="font-size: 1.3rem;"></i>
+                <div>
+                    <h5 class="mb-2 fw-bold">⚠️ Important Disclaimer</h5>
+                    <p class="mb-0 small">
+                        <strong>MediDetect is educational only, NOT a medical diagnosis.</strong>
+                        Always consult a healthcare professional before taking medical action. In emergencies, contact emergency services immediately.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="row g-3 mt-2">
+                <div class="col-sm-6 col-lg-3">
+                    <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-plus-circle"></i> New Prediction
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a href="{{ url_for('hospitals') }}" class="btn btn-outline-primary btn-lg w-100">
+                        <i class="bi bi-hospital"></i> Find Hospitals
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a href="{{ url_for('history') }}" class="btn btn-outline-secondary btn-lg w-100">
+                        <i class="bi bi-clock-history"></i> View History
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg w-100">
+                        <i class="bi bi-house"></i> Home
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- NAVIGATION -->
-    <div class="d-flex gap-2">
-        <a href="{{ url_for('predict') }}" class="btn btn-outline-primary">← Start New Prediction</a>
-        <a href="{{ url_for('history') }}" class="btn btn-outline-secondary">📋 View History</a>
-        <a href="{{ url_for('about') }}" class="btn btn-outline-info">ℹ️ About</a>
-    </div>
-
 </div>
+
+<style>
+.list-group-item {
+    background: none !important;
+}
+
+.progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+    height: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+</style>
 {% endblock %}

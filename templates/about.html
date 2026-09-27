@@ -1,93 +1,276 @@
 {% extends "base.html" %}
-{% block title %}About - AI MediDetect{% endblock %}
+{% block title %}About - MediDetect{% endblock %}
 {% block content %}
-<div class="container">
+
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="text-center mb-4">
-                <h1 class="display-5 fw-bold text-primary"><i class="bi bi-info-circle"></i> About AI MediDetect</h1>
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold mb-2">
+                    <span style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        About MediDetect
+                    </span>
+                </h1>
+                <p class="lead text-muted">Learn about our AI-powered healthcare assistance system</p>
             </div>
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body p-4 p-md-5">
-                    <h3 class="fw-bold mb-3">What is AI MediDetect?</h3>
-                    <p class="text-muted lead">AI MediDetect is an <strong>AI-Based Disease Prediction and Healthcare Assistance System</strong> developed as an educational project for MCA college submission.</p>
-                    <p class="text-muted">This web application demonstrates the practical application of machine learning in healthcare by analyzing user-reported symptoms and predicting possible medical conditions using a trained Random Forest classifier.</p>
+
+            <!-- Project Overview -->
+            <div class="card border-0 shadow-lg mb-4 overflow-hidden">
+                <div class="card-header" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); border: none; padding: 2rem;">
+                    <h4 class="text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-book"></i>
+                        Project Overview
+                    </h4>
+                </div>
+                <div class="card-body p-4 p-lg-5">
+                    <h5 class="fw-bold mb-3">What is MediDetect?</h5>
+                    <p class="mb-3 lead">
+                        MediDetect is an <strong>educational project</strong> that demonstrates the application of machine learning
+                        in healthcare. It provides an intelligent symptom analysis tool that uses artificial intelligence to predict 
+                        possible health conditions based on user-reported symptoms.
+                    </p>
+
+                    <h5 class="fw-bold mb-3 mt-4">Key Features</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-success flex-shrink-0"></i>
+                                <div>
+                                    <strong>AI-Powered Analysis</strong>
+                                    <p class="small text-muted mb-0">Random Forest machine learning model for prediction</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-success flex-shrink-0"></i>
+                                <div>
+                                    <strong>19 Common Symptoms</strong>
+                                    <p class="small text-muted mb-0">Comprehensive symptom selection</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-success flex-shrink-0"></i>
+                                <div>
+                                    <strong>7 Disease Categories</strong>
+                                    <p class="small text-muted mb-0">Covers common health conditions</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-success flex-shrink-0"></i>
+                                <div>
+                                    <strong>Hospital Finder</strong>
+                                    <p class="small text-muted mb-0">OpenStreetMap integration for nearby hospitals</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-primary text-white py-3">
-                    <h4 class="mb-0 h5"><i class="bi bi-target"></i> Project Objectives</h4>
+
+            <!-- Technology Stack -->
+            <div class="card border-0 shadow-lg mb-4 overflow-hidden">
+                <div class="card-header" style="background: linear-gradient(135deg, #198754 0%, #157347 100%); border: none; padding: 2rem;">
+                    <h4 class="text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-cpu"></i>
+                        Technology Stack
+                    </h4>
                 </div>
-                <div class="card-body p-4">
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> <strong>Demonstrate ML in Healthcare:</strong> Show how machine learning can be applied to medical symptom analysis</li>
-                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> <strong>Provide Healthcare Information:</strong> Offer general information about common diseases and precautions</li>
-                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> <strong>Hospital Locator:</strong> Help users find nearby healthcare facilities using OpenStreetMap</li>
-                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> <strong>Educational Purpose:</strong> Serve as a learning project for AI/ML applications</li>
+                <div class="card-body p-4 p-lg-5">
+                    <div class="row g-4">
+                        <!-- Backend -->
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Backend</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><span class="badge bg-primary">Python 3.12</span> - Server language</li>
+                                <li class="mb-2"><span class="badge bg-primary">Flask 2.3.3</span> - Web framework</li>
+                                <li class="mb-2"><span class="badge bg-primary">scikit-learn 1.3.2</span> - Machine learning</li>
+                                <li class="mb-2"><span class="badge bg-primary">NumPy & Pandas</span> - Data processing</li>
+                            </ul>
+                        </div>
+
+                        <!-- Frontend -->
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Frontend</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><span class="badge bg-success">HTML5</span> - Markup</li>
+                                <li class="mb-2"><span class="badge bg-success">Bootstrap 5</span> - Styling</li>
+                                <li class="mb-2"><span class="badge bg-success">JavaScript</span> - Interactivity</li>
+                                <li class="mb-2"><span class="badge bg-success">Jinja2</span> - Templating</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Model Details -->
+                    <h6 class="fw-bold mt-4 mb-3">Machine Learning Model</h6>
+                    <div class="alert alert-light border-0 p-3">
+                        <ul class="mb-0 ps-3">
+                            <li><strong>Algorithm:</strong> Random Forest Classifier</li>
+                            <li><strong>Training Samples:</strong> 140 (20 per disease)</li>
+                            <li><strong>Features:</strong> 19 symptoms</li>
+                            <li><strong>Classes:</strong> 7 disease categories</li>
+                            <li><strong>Train/Test Split:</strong> 80/20</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diseases Covered -->
+            <div class="card border-0 shadow-lg mb-4 overflow-hidden">
+                <div class="card-header" style="background: linear-gradient(135deg, #0dcaf0 0%, #0db5d9 100%); border: none; padding: 2rem;">
+                    <h4 class="text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-capsule-pill"></i>
+                        Diseases Covered
+                    </h4>
+                </div>
+                <div class="card-body p-4 p-lg-5">
+                    <div class="row g-3">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-primary" style="font-size: 1.3rem;"></i>
+                                <p class="mb-0"><strong>Common Cold</strong><br><small class="text-muted">Viral respiratory infection</small></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-primary" style="font-size: 1.3rem;"></i>
+                                <p class="mb-0"><strong>Viral Fever</strong><br><small class="text-muted">Fever with viral etiology</small></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-primary" style="font-size: 1.3rem;"></i>
+                                <p class="mb-0"><strong>Pneumonia</strong><br><small class="text-muted">Lung infection</small></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-primary" style="font-size: 1.3rem;"></i>
+                                <p class="mb-0"><strong>Asthma</strong><br><small class="text-muted">Chronic respiratory disease</small></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-primary" style="font-size: 1.3rem;"></i>
+                                <p class="mb-0"><strong>Heart Disease</strong><br><small class="text-muted">Cardiovascular condition</small></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-primary" style="font-size: 1.3rem;"></i>
+                                <p class="mb-0"><strong>Diabetes</strong><br><small class="text-muted">Metabolic disorder</small></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle text-primary" style="font-size: 1.3rem;"></i>
+                                <p class="mb-0"><strong>Allergic Rhinitis</strong><br><small class="text-muted">Allergic inflammation</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team & Credits -->
+            <div class="card border-0 shadow-lg mb-4 overflow-hidden">
+                <div class="card-header" style="background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%); border: none; padding: 2rem;">
+                    <h4 class="text-dark mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-people"></i>
+                        Team & Credits
+                    </h4>
+                </div>
+                <div class="card-body p-4 p-lg-5">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex gap-3">
+                                <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; flex-shrink-0;">
+                                    S
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Suhani Srivastava</h6>
+                                    <p class="text-muted small mb-0">Developer (Mimi)</p>
+                                    <small class="text-muted">MCA Student, Lucknow</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex gap-3">
+                                <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #198754 0%, #157347 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; flex-shrink-0;">
+                                    K
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Krishna Gupta</h6>
+                                    <p class="text-muted small mb-0">Developer</p>
+                                    <small class="text-muted">MCA Student, India</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="alert alert-danger border-0 d-flex align-items-start gap-3 mb-4">
+                <i class="bi bi-exclamation-circle-fill flex-shrink-0" style="font-size: 1.5rem; margin-top: 0.25rem;"></i>
+                <div>
+                    <h5 class="fw-bold mb-2">⚠️ Important Legal Disclaimer</h5>
+                    <p class="mb-2">
+                        <strong>MediDetect is an EDUCATIONAL PROJECT ONLY</strong> and is intended for demonstration purposes to showcase
+                        machine learning applications in healthcare.
+                    </p>
+                    <ul class="mb-0 ps-3">
+                        <li><strong>NOT a Medical Diagnosis:</strong> Predictions are NOT medical diagnoses and should not be treated as such.</li>
+                        <li><strong>NOT a Substitute for Professional Advice:</strong> Always consult qualified healthcare professionals.</li>
+                        <li><strong>NO Medical Advice:</strong> This tool provides educational analysis only, not medical advice.</li>
+                        <li><strong>Use at Your Own Risk:</strong> Users assume all responsibility for any actions taken based on predictions.</li>
+                        <li><strong>Emergencies:</strong> In emergencies, call local emergency services immediately (112 in India).</li>
                     </ul>
                 </div>
             </div>
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-info text-white py-3">
-                    <h4 class="mb-0 h5"><i class="bi bi-layers"></i> Technology Stack</h4>
+
+            <!-- Learning Resources -->
+            <div class="card border-0 shadow-lg overflow-hidden">
+                <div class="card-header" style="background: linear-gradient(135deg, #dc3545 0%, #bb2d3b 100%); border: none; padding: 2rem;">
+                    <h4 class="text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-book-half"></i>
+                        Learning Outcome
+                    </h4>
                 </div>
-                <div class="card-body p-4">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <h6 class="fw-bold">Frontend</h6>
-                            <ul class="list-unstyled mb-0 text-muted">
-                                <li><i class="bi bi-dot"></i> HTML5 & CSS3</li>
-                                <li><i class="bi bi-dot"></i> Bootstrap 5</li>
-                                <li><i class="bi bi-dot"></i> JavaScript</li>
-                                <li><i class="bi bi-dot"></i> Leaflet.js (Maps)</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="fw-bold">Backend</h6>
-                            <ul class="list-unstyled mb-0 text-muted">
-                                <li><i class="bi bi-dot"></i> Python 3.12</li>
-                                <li><i class="bi bi-dot"></i> Flask</li>
-                                <li><i class="bi bi-dot"></i> scikit-learn</li>
-                                <li><i class="bi bi-dot"></i> Pandas & NumPy</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="fw-bold">Data & APIs</h6>
-                            <ul class="list-unstyled mb-0 text-muted">
-                                <li><i class="bi bi-dot"></i> CSV Datasets</li>
-                                <li><i class="bi bi-dot"></i> Pickle (Model Storage)</li>
-                                <li><i class="bi bi-dot"></i> OpenStreetMap API</li>
-                                <li><i class="bi bi-dot"></i> Overpass API</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="fw-bold">Deployment</h6>
-                            <ul class="list-unstyled mb-0 text-muted">
-                                <li><i class="bi bi-dot"></i> Gunicorn</li>
-                                <li><i class="bi bi-dot"></i> Render/Railway</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="alert alert-warning border-0 shadow-sm mb-4">
-                <div class="d-flex gap-3">
-                    <i class="bi bi-exclamation-triangle-fill fs-3"></i>
-                    <div>
-                        <h5 class="fw-bold mb-2">Medical Disclaimer</h5>
-                        <p class="mb-2"><strong>AI MediDetect is an educational project only.</strong> It is designed to demonstrate machine learning applications in healthcare and is <strong>NOT intended for actual medical diagnosis</strong>.</p>
-                        <p class="mb-0"><strong>Always consult qualified healthcare professionals</strong> for proper medical diagnosis, advice, and treatment. In case of medical emergencies, contact emergency services immediately.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="card border-0 shadow-sm bg-light">
-                <div class="card-body p-4 text-center">
-                    <p class="mb-2"><strong>Project Type:</strong> MCA College Mini-Project</p>
-                    <p class="mb-2"><strong>Developed By:</strong> Suhani Srivastava & Krishna Gupta</p>
-                    <p class="mb-0"><strong>Year:</strong> 2024-2026</p>
+                <div class="card-body p-4 p-lg-5">
+                    <p class="mb-3">
+                        This project demonstrates practical implementation of:
+                    </p>
+                    <ul class="ps-3">
+                        <li class="mb-2"><strong>Machine Learning:</strong> Random Forest classifier for multiclass prediction</li>
+                        <li class="mb-2"><strong>Web Development:</strong> Flask backend with Jinja2 templating</li>
+                        <li class="mb-2"><strong>UI/UX Design:</strong> Responsive Bootstrap-based interface</li>
+                        <li class="mb-2"><strong>API Integration:</strong> OpenStreetMap API for hospital location</li>
+                        <li class="mb-2"><strong>Data Processing:</strong> NumPy and Pandas for feature encoding</li>
+                        <li class="mb-2"><strong>Database Management:</strong> CSV-based data storage</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Navigation -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-activity"></i> Start Analysis
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-house"></i> Home
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
+
 {% endblock %}

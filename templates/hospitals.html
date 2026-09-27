@@ -1,110 +1,239 @@
 {% extends "base.html" %}
-
+{% block title %}Find Hospitals - MediDetect{% endblock %}
 {% block content %}
-<div class="container py-4">
-    <h1>Find Nearby Hospitals and Clinics</h1>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Search Form Card -->
+            <div class="card border-0 shadow-lg overflow-hidden fade-in mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #0dcaf0 0%, #0db5d9 100%); border: none; padding: 2.5rem;">
+                    <h3 class="text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-hospital"></i>
+                        Find Healthcare Facilities Near You
+                    </h3>
+                </div>
 
-    <div class="alert alert-info">
-        Hospital data comes from OpenStreetMap and may be incomplete.
-        In an emergency, contact local emergency services immediately.
-    </div>
+                <div class="card-body p-4 p-lg-5">
+                    <form method="POST" class="row g-3">
+                        <div class="col-lg-8">
+                            <label for="location" class="form-label fw-bold">Location</label>
+                            <input 
+                                type="text" 
+                                class="form-control form-control-lg" 
+                                id="location" 
+                                name="location" 
+                                placeholder="Enter city, area, address or pincode (e.g., Lucknow or Krishna Nagar, Lucknow)"
+                                required
+                            >
+                            <small class="text-muted d-block mt-2">
+                                Examples: "Lucknow", "Gomti Nagar, Lucknow", "226010"
+                            </small>
+                        </div>
 
-    <form method="POST" class="card p-4 mb-4">
-        <div class="mb-3">
-            <label for="location" class="form-label">
-                City, area, address, or pincode
-            </label>
+                        <div class="col-lg-4">
+                            <label for="radius" class="form-label fw-bold">Search Radius (km)</label>
+                            <select class="form-select form-select-lg" id="radius" name="radius">
+                                <option value="5000" selected>5 km</option>
+                                <option value="10000">10 km</option>
+                                <option value="15000">15 km</option>
+                                <option value="25000">25 km</option>
+                                <option value="50000">50 km</option>
+                            </select>
+                        </div>
 
-            <input
-                type="text"
-                id="location"
-                name="location"
-                class="form-control"
-                placeholder="Example: Gomti Nagar, Lucknow"
-                required
-            >
-        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-search"></i> Search Hospitals
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label for="radius" class="form-label">
-                Search radius
-            </label>
+            <!-- Error Message -->
+            {% if error %}
+            <div class="alert alert-danger border-0 d-flex align-items-start gap-3 mb-4">
+                <i class="bi bi-exclamation-circle-fill flex-shrink-0 mt-1" style="font-size: 1.3rem;"></i>
+                <div>
+                    <h5 class="mb-2 fw-bold">Search Error</h5>
+                    <p class="mb-0">{{ error }}</p>
+                    <small class="text-muted d-block mt-2">
+                        💡 Tip: Use major city names like "Lucknow", "Mumbai", or "Delhi". 
+                        If you get rate-limit error, wait 2 minutes and try again.
+                    </small>
+                </div>
+            </div>
+            {% endif %}
 
-            <select id="radius" name="radius" class="form-select">
-                <option value="5000">5 km</option>
-                <option value="10000">10 km</option>
-                <option value="20000">20 km</option>
-                <option value="50000">50 km</option>
-            </select>
-        </div>
+            <!-- Results Section -->
+            {% if results %}
+            <div class="card border-0 shadow-lg overflow-hidden fade-in mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #198754 0%, #157347 100%); border: none; padding: 1.5rem;">
+                    <h5 class="text-white mb-0 d-flex align-items-center gap-2 justify-content-between">
+                        <span>
+                            <i class="bi bi-check-circle-fill"></i>
+                            Found {{ results.count }} Healthcare Facilities
+                        </span>
+                        <small>Within {{ results.radius_km|round(1) }} km of {{ results.search_location }}</small>
+                    </h5>
+                </div>
 
-        <button type="submit" class="btn btn-primary">
-            Search Healthcare Facilities
-        </button>
-    </form>
+                <div class="card-body p-0">
+                    <!-- Hospital List -->
+                    <div class="list-group list-group-flush">
+                        {% for hospital in results.hospitals %}
+                        <div class="list-group-item border-start-0 border-end-0 border-bottom p-4">
+                            <div class="row align-items-start">
+                                <!-- Hospital Info -->
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-start gap-3">
+                                        <!-- Icon -->
+                                        <div style="font-size: 2rem; color: #0dcaf0;">
+                                            {% if hospital.emergency %}
+                                                <i class="bi bi-hospital"></i>
+                                            {% else %}
+                                                <i class="bi bi-building"></i>
+                                            {% endif %}
+                                        </div>
 
-    {% if error %}
-    <div class="alert alert-danger">
-        {{ error }}
-    </div>
-    {% endif %}
+                                        <!-- Details -->
+                                        <div class="flex-grow-1">
+                                            <h6 class="fw-bold mb-1">
+                                                {{ hospital.name }}
+                                                {% if hospital.emergency %}
+                                                <span class="badge bg-danger ms-2">
+                                                    <i class="bi bi-exclamation-triangle-fill"></i> Emergency
+                                                </span>
+                                                {% endif %}
+                                            </h6>
 
-    {% if results %}
-    <div class="mb-3">
-        <h2>Results</h2>
-        <p>
-            Search location: {{ results.search_location }}<br>
-            Facilities found: {{ results.count }}<br>
-            Radius: {{ results.radius_km }} km
-        </p>
-    </div>
+                                            <!-- Type -->
+                                            <p class="mb-2 small text-muted">
+                                                <i class="bi bi-tag"></i>
+                                                {{ hospital.type|title }}
+                                            </p>
 
-    <div class="row">
-        {% for hospital in results.hospitals %}
-        <div class="col-md-6 mb-3">
-            <div class="card h-100 p-3">
-                <h3>{{ hospital.name }}</h3>
+                                            <!-- Address -->
+                                            {% if hospital.address %}
+                                            <p class="mb-2 small">
+                                                <i class="bi bi-geo-alt text-primary"></i>
+                                                {{ hospital.address }}
+                                            </p>
+                                            {% endif %}
 
-                <p>
-                    <strong>Type:</strong>
-                    {{ hospital.type|title }}
-                </p>
+                                            <!-- Contact Info -->
+                                            <div class="row g-3 small mt-2">
+                                                {% if hospital.phone %}
+                                                <div class="col-auto">
+                                                    <i class="bi bi-telephone text-success"></i>
+                                                    <a href="tel:{{ hospital.phone }}" class="text-decoration-none">
+                                                        {{ hospital.phone }}
+                                                    </a>
+                                                </div>
+                                                {% endif %}
 
-                <p>
-                    <strong>Distance:</strong>
-                    {{ hospital.distance }}
-                </p>
+                                                {% if hospital.website %}
+                                                <div class="col-auto">
+                                                    <i class="bi bi-globe text-info"></i>
+                                                    <a href="{{ hospital.website }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                                                        Website
+                                                    </a>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                <p>
-                    <strong>Address:</strong>
-                    {{ hospital.address }}
-                </p>
+                                <!-- Distance Badge -->
+                                <div class="col-md-4 text-end">
+                                    <div class="badge bg-light text-dark p-3" style="font-size: 0.95rem;">
+                                        <div class="text-muted small mb-1">Distance</div>
+                                        <div class="fw-bold" style="font-size: 1.2rem; color: #0dcaf0;">
+                                            {{ hospital.distance }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
 
-                {% if hospital.phone %}
-                <p>
-                    <strong>Phone:</strong>
-                    {{ hospital.phone }}
-                </p>
-                {% endif %}
+            <!-- Info Box -->
+            <div class="alert alert-info border-0 d-flex align-items-start gap-3">
+                <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+                <div>
+                    <h6 class="mb-2 fw-bold">📋 How to Use</h6>
+                    <ul class="mb-0 ps-3 small">
+                        <li>Click on phone number to call directly</li>
+                        <li>Click website to visit hospital's page</li>
+                        <li>Emergency facilities are marked in red</li>
+                        <li>Results are sorted by distance (closest first)</li>
+                    </ul>
+                </div>
+            </div>
 
-                {% if hospital.emergency %}
-                <p class="text-danger">
-                    Emergency service is marked as available.
-                </p>
-                {% endif %}
+            {% else %}
+            <!-- No Search Yet -->
+            {% if not error %}
+            <div class="alert alert-light border-0 d-flex align-items-start gap-3">
+                <i class="bi bi-search flex-shrink-0 mt-1" style="font-size: 1.3rem; color: #0dcaf0;"></i>
+                <div>
+                    <h6 class="mb-2 fw-bold">🔍 Search for Hospitals</h6>
+                    <p class="mb-0 small text-muted">
+                        Enter a location above to find nearby healthcare facilities. You can search by:
+                    </p>
+                    <ul class="mb-0 ps-3 small text-muted mt-2">
+                        <li>City name: "Lucknow", "Mumbai", "Delhi"</li>
+                        <li>Area name: "Gomti Nagar, Lucknow"</li>
+                        <li>Pincode: "226010", "400001"</li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
 
-                <a
-                    class="btn btn-outline-primary"
-                    target="_blank"
-                    rel="noopener"
-                    href="https://www.google.com/maps/search/?api=1&query={{ hospital.lat }},{{ hospital.lon }}"
-                >
-                    Open in Maps
-                </a>
+            <!-- Navigation -->
+            <div class="row g-3 mt-4">
+                <div class="col-sm-6">
+                    <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-stethoscope"></i> Symptom Checker
+                    </a>
+                </div>
+                <div class="col-sm-6">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg w-100">
+                        <i class="bi bi-house"></i> Home
+                    </a>
+                </div>
             </div>
         </div>
-        {% endfor %}
     </div>
-    {% endif %}
 </div>
+
+<style>
+.list-group-item {
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
 {% endblock %}
